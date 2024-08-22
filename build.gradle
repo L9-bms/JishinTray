@@ -1,0 +1,59 @@
+plugins {
+    id 'org.beryx.runtime' version '1.13.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'ch.qos.logback:logback-classic:1.5.7'
+    implementation 'com.miglayout:miglayout-swing:11.4'
+
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'com.callumwong.jishintray.JishinTray'
+    applicationName = 'JishinTray'
+    applicationDefaultJvmArgs = ['-Dlogback.configurationFile=$APPDIR/logback.xml']
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': "JishinTray",
+                'Main-Class': 'com.callumwong.jishintray.JishinTray'
+    }
+}
+
+runtime {
+    modules = ['java.naming', 'java.xml']
+    jpackage {
+        def currentOs = org.gradle.internal.os.OperatingSystem.current()
+        if (currentOs.windows) {
+            installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
+            imageOptions = ['--win-console']
+        } else if (currentOs.linux) {
+            installerOptions += ['--linux-package-name', 'JishinTray', '--linux-shortcut']
+        } else if (currentOs.macOsX) {
+            installerOptions += ['--mac-package-name', 'JishinTray']
+            installerType = 'dmg'
+        }
+    }
+}
+
+tasks.jpackage.doFirst {
+    def currentOs = org.gradle.internal.os.OperatingSystem.current()
+    def basePath = currentOs.windows ? project.name : currentOs.linux ? "$project.name/lib" : "${project.name}.app/Contents"
+    copy {
+        from('src/main/resources')
+        into(rootProject.layout.buildDirectory.dir("jpackage/$basePath/app"))
+    }
+}
