@@ -25,9 +25,7 @@ public class JishinTray {
         frame.add(messageLabel, "wrap");
 
         JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> {
-            frame.dispose();
-        });
+        closeButton.addActionListener(e -> frame.dispose());
         frame.add(closeButton, "align center");
 
         frame.pack();
@@ -46,6 +44,6 @@ public class JishinTray {
         SwingUtilities.invokeLater(JishinTray::new);
 
         P2PApiApi p2PApi = new P2PApiApi();
-        logger.info(p2PApi.historyGet(List.of(551), 10, 0).toString());
+        logger.info(p2PApi.historyGet(null, null ,null).toString());
     }
 }

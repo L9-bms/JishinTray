@@ -340,7 +340,7 @@ components:
           required:
             - issue
             - earthquake
-            - comments
+#            - comments
           properties:
             code:
               description: 情報コード。常に551です。
@@ -533,6 +533,7 @@ components:
             cancelled:
               type: boolean
               description: 津波予報が解除されたかどうか。trueの場合、areasは空配列です。
+              default: true
             issue:
               type: object
               description: 発表元の情報
