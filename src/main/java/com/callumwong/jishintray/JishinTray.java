@@ -1,14 +1,12 @@
 package com.callumwong.jishintray;
 
 import net.miginfocom.swing.MigLayout;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.api.P2PApiApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
+import java.io.IOException;
 
 public class JishinTray {
     private static final Logger logger = LoggerFactory.getLogger(JishinTray.class);
@@ -39,11 +37,16 @@ public class JishinTray {
         frame.setVisible(true);
     }
 
-    public static void main(String[] args) throws ApiException {
+    public static void main(String[] args) {
         logger.info("Starting JishinTray");
-        SwingUtilities.invokeLater(JishinTray::new);
+//        SwingUtilities.invokeLater(JishinTray::new);
 
-        P2PApiApi p2PApi = new P2PApiApi();
-        logger.info(p2PApi.historyGet(null, null ,null).toString());
+        try {
+            new History().getHistory();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

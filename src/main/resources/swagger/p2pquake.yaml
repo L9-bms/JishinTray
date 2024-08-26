@@ -361,21 +361,21 @@ components:
                   type: string
                   description: 発表種類
                   enum:
-                    - ScalePrompt(震度速報)
-                    - Destination(震源に関する情報)
-                    - ScaleAndDestination(震度・震源に関する情報)
-                    - DetailScale(各地の震度に関する情報)
-                    - Foreign(遠地地震に関する情報)
-                    - Other(その他の情報)
+                    - ScalePrompt
+                    - Destination
+                    - ScaleAndDestination
+                    - DetailScale
+                    - Foreign
+                    - Other
                 correct:
                   type: string
                   description: 訂正の有無
                   enum:
-                    - None(なし)
-                    - Unknown(不明)
-                    - ScaleOnly(震度)
-                    - DestinationOnly(震源)
-                    - ScaleAndDestination(震度・震源)
+                    - None
+                    - Unknown
+                    - ScaleOnly
+                    - DestinationOnly
+                    - ScaleAndDestination
             earthquake:
               type: object
               required:
@@ -409,40 +409,40 @@ components:
                   format: int32
                   description: 最大震度。震度情報が存在しない場合は-1となります。
                   enum:
-                    - -1(震度情報なし)
-                    - 10(震度1)
-                    - 20(震度2)
-                    - 30(震度3)
-                    - 40(震度4)
-                    - 45(震度5弱)
-                    - 50(震度5強)
-                    - 55(震度6弱)
-                    - 60(震度6強)
-                    - 70(震度7)
+                    - -1
+                    - 10
+                    - 20
+                    - 30
+                    - 40
+                    - 45
+                    - 50
+                    - 55
+                    - 60
+                    - 70
                 domesticTsunami:
                   type: string
                   description: 国内への津波の有無
                   enum:
-                    - None(なし)
-                    - Unknown(不明)
-                    - Checking(調査中)
-                    - NonEffective(若干の海面変動が予想されるが、被害の心配なし)
-                    - Watch(津波注意報)
-                    - Warning(津波予報(種類不明))
+                    - None
+                    - Unknown
+                    - Checking
+                    - NonEffective
+                    - Watch
+                    - Warning
                 foreignTsunami:
                   type: string
                   description: 海外での津波の有無
                   enum:
-                    - None(なし)
-                    - Unknown(不明)
-                    - Checking(調査中)
-                    - NonEffectiveNearby(震源の近傍で小さな津波の可能性があるが、被害の心配なし)
-                    - WarningNearby(震源の近傍で津波の可能性がある)
-                    - WarningPacific(太平洋で津波の可能性がある)
-                    - WarningPacificWide(太平洋の広域で津波の可能性がある)
-                    - WarningIndian(インド洋で津波の可能性がある)
-                    - WarningIndianWide(インド洋の広域で津波の可能性がある)
-                    - Potential(一般にこの規模では津波の可能性がある)
+                    - None
+                    - Unknown
+                    - Checking
+                    - NonEffectiveNearby
+                    - WarningNearby
+                    - WarningPacific
+                    - WarningPacificWide
+                    - WarningIndian
+                    - WarningIndianWide
+                    - Potential
             points:
               type: array
               description: 震度観測点の情報
@@ -467,16 +467,16 @@ components:
                     type: number
                     description: 震度
                     enum:
-                      - 10(震度1)
-                      - 20(震度2)
-                      - 30(震度3)
-                      - 40(震度4)
-                      - 45(震度5弱)
-                      - 46(震度5弱以上と推定されるが震度情報を入手していない)
-                      - 50(震度5強)
-                      - 55(震度6弱)
-                      - 60(震度6強)
-                      - 70(震度7)
+                      - 10
+                      - 20
+                      - 30
+                      - 40
+                      - 45
+                      - 46
+                      - 50
+                      - 55
+                      - 60
+                      - 70
             comments:
               type: object
               description: 付加文（2024年8月下旬から提供予定）
@@ -561,10 +561,10 @@ components:
                     type: string
                     description: 津波予報の種類
                     enum:
-                      - MajorWarning (大津波警報)
-                      - Warning (津波警報)
-                      - Watch (津波注意報)
-                      - Unknown (不明)
+                      - MajorWarning
+                      - Warning
+                      - Watch
+                      - Unknown
                   immediate:
                     type: boolean
                     description: 直ちに津波が来襲すると予想されているかどうか
@@ -696,8 +696,8 @@ components:
               type: string
               description: 検出種類
               enum:
-                - "Full (チャイム＋音声)"
-                - "Chime (チャイム (未実装))"
+                - "Full"
+                - "Chime"
           example:
             code: 554
             type: "Full"
@@ -807,42 +807,42 @@ components:
                       最大予測震度の下限  
                       システムの都合で小数点が付きますが整数部のみ有効です。
                     enum:
-                      - -1(不明)
-                      - 0(震度0)
-                      - 10(震度1)
-                      - 20(震度2)
-                      - 30(震度3)
-                      - 40(震度4)
-                      - 45(震度5弱)
-                      - 50(震度5強)
-                      - 55(震度6弱)
-                      - 60(震度6強)
-                      - 70(震度7)
+                      - -1
+                      - 0
+                      - 10
+                      - 20
+                      - 30
+                      - 40
+                      - 45
+                      - 50
+                      - 55
+                      - 60
+                      - 70
                   scaleTo:
                     type: number
                     description: |
                       最大予測震度の上限  
                       システムの都合で小数点が付きますが整数部のみ有効です。
                     enum:
-                      - -1(不明)
-                      - 0(震度0)
-                      - 10(震度1)
-                      - 20(震度2)
-                      - 30(震度3)
-                      - 40(震度4)
-                      - 45(震度5弱)
-                      - 50(震度5強)
-                      - 55(震度6弱)
-                      - 60(震度6強)
-                      - 70(震度7)
-                      - 99(～程度以上)
+                      - -1
+                      - 0
+                      - 10
+                      - 20
+                      - 30
+                      - 40
+                      - 45
+                      - 50
+                      - 55
+                      - 60
+                      - 70
+                      - 99
                   kindCode:
                     type: string
                     description: 警報コード
                     enum:
-                      - 10 (緊急地震速報（警報） 主要動について、未到達と予測)
-                      - 11 (緊急地震速報（警報） 主要動について、既に到達と予測)
-                      - 19 (緊急地震速報（警報） 主要動の到達予想なし（PLUM法による予想）)
+                      - 10
+                      - 11
+                      - 19
                   arrivalTime:
                     type: string
                     description: 主要動の到達予測時刻

@@ -64,6 +64,10 @@ tasks.jpackage.doFirst {
     }
 }
 
+compileJava {
+    dependsOn "openApiGenerate"
+}
+
 openApiGenerate {
     generatorName.set("java")
     inputSpec.set("$projectDir/src/main/resources/swagger/p2pquake.yaml")
@@ -72,6 +76,12 @@ openApiGenerate {
             disallowAdditionalPropertiesIfNotPresent: "false",
             dateLibrary: "java8",
             library: "native"
+    ])
+    apiPackage.set("com.callumwong.jishintray.api")
+    modelPackage.set("com.callumwong.jishintray.model")
+    globalProperties.set([
+            generateSupportingFiles: "false",
+            generateApis: "false"
     ])
 }
 
