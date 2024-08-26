@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
 
 public class JishinTray {
     private static final Logger logger = LoggerFactory.getLogger(JishinTray.class);
@@ -41,12 +42,7 @@ public class JishinTray {
         logger.info("Starting JishinTray");
 //        SwingUtilities.invokeLater(JishinTray::new);
 
-        try {
-            new History().getHistory();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        P2PQuakeClient c = new P2PQuakeClient(URI.create("wss://api-realtime-sandbox.p2pquake.net/v2/ws"));
+        c.connect();
     }
 }
