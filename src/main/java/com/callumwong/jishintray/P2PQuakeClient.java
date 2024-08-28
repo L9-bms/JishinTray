@@ -34,30 +34,60 @@ public class P2PQuakeClient extends WebSocketClient {
     public void onMessage(String message) {
         try {
             JsonNode node = mapper.readTree(message);
+
             if (!node.has("code")) return;
             int code = node.get("code").asInt();
+
+            String id;
+            if (node.hasNonNull("id")) {
+                id = node.get("id").asText();
+            } else if (node.hasNonNull("_id")) {
+                id = node.get("_id").asText();
+            } else {
+                logger.error("json object does not have id or _id field: {}", node.toPrettyString());
+                return;
+            }
+
             switch (code) {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
-                    logger.info(jmaQuake.toString());
+
+                    String imageUrl = String.format("https://www.p2pquake.net/app/images/%s_trim_big.png", id);
+
+                    switch (jmaQuake.getIssue().getType()) {
+                        case SCALE_PROMPT -> {
+
+                        }
+                        case DESTINATION -> {
+                        }
+                        case SCALE_AND_DESTINATION -> {
+                        }
+                        case DETAIL_SCALE -> {
+                        }
+                        case FOREIGN -> {
+                        }
+                        case OTHER -> {
+                        }
+                    }
+
                     break;
-                case 552: // Tsunami forecast
+                case 552: // Tsunami information
                     JMATsunami jmaTsunami = mapper.readValue(message, JMATsunami.class);
                     logger.info(jmaTsunami.toString());
                     break;
-                case 554: // EEW Detection
+                case 554: // EEW detection
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
                     logger.info("EEW DETECTEDEWOOOO");
                     break;
-                case 556: // EEW Alert
+                case 556: // EEW alert
                     EEW eew = mapper.readValue(message, EEW.class);
                     if (eew.getAreas() != null) {
                         logger.info("Earthquake Early Warning in: {}", eew.getAreas().stream().map(EEWAllOfAreas::getPref).collect(Collectors.joining(",")));
                     }
                     break;
-                case 555: // Number of peers
-                case 561: // P2P Earthquake detection
-                case 9611: // Analysis result
+                case 555: // Peers in area
+                case 561: // P2P Userquake
+                case 9611: // P2P Userquake Evaluation
                     break;
                 default:
                     logger.error("unexpected code: {}", code);
