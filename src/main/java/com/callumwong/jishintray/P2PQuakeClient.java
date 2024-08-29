@@ -10,6 +10,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.net.URI;
 import java.util.stream.Collectors;
 
@@ -53,10 +54,11 @@ public class P2PQuakeClient extends WebSocketClient {
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
                     String imageUrl = String.format("https://www.p2pquake.net/app/images/%s_trim_big.png", id);
+                    logger.info(jmaQuake.getIssue().toString());
+                    SwingUtilities.invokeLater(Notification::new);
 
                     switch (jmaQuake.getIssue().getType()) {
                         case SCALE_PROMPT -> {
-
                         }
                         case DESTINATION -> {
                         }
