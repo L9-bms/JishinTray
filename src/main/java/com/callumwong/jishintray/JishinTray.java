@@ -30,7 +30,7 @@ public class JishinTray {
             throw new RuntimeException("Unable to load SystemTray!");
         }
 
-        URL url = JishinTray.class.getClassLoader().getResource("logo.svg");
+        URL url = JishinTray.class.getClassLoader().getResource("icon.png");
         tray.setImage(url);
         tray.setStatus("test");
         tray.getMenu().add(new MenuItem("Open", e -> {

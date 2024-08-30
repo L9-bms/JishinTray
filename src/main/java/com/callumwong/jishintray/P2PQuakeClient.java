@@ -55,7 +55,11 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     String imageUrl = String.format("https://www.p2pquake.net/app/images/%s_trim_big.png", id);
                     logger.info(jmaQuake.getIssue().toString());
-                    SwingUtilities.invokeLater(Notification::new);
+                    SwingUtilities.invokeLater(() -> new NotificationBuilder()
+                            .setTitle("title")
+                            .setDescription("description")
+                            .setImage(URI.create(imageUrl))
+                            .createNotification());
 
                     switch (jmaQuake.getIssue().getType()) {
                         case SCALE_PROMPT -> {
