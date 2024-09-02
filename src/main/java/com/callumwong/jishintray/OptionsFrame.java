@@ -61,13 +61,13 @@ public class OptionsFrame extends JFrame {
         });
         add(opacitySlider, "wrap");
 
-        JButton applyButton = new JButton("Apply");
+        JButton saveButton = new JButton("Save");
         JButton cancelButton = new JButton("Close");
 
-        applyButton.addActionListener(e -> AppConfig.saveConfig());
+        saveButton.addActionListener(e -> AppConfig.saveConfig());
         cancelButton.addActionListener(e -> dispose());
 
-        add(applyButton, "span, split 2, center");
+        add(saveButton, "span, split 2, center");
         add(cancelButton);
 
         pack();

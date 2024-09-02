@@ -45,7 +45,7 @@ public class Notification extends JFrame {
 
         setVisible(true);
 
-        initialOpacity = (float) AppConfig.getConfig().getInt("opacity") / 100f;
+        initialOpacity = (float) AppConfig.getConfig().getInt("opacity", 80) / 100f;
         Timer delayTimer = fadeOpacityTimer();
         delayTimer.start();
     }
