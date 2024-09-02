@@ -55,8 +55,8 @@ public class OptionsFrame extends JFrame {
         opacitySlider.setMinorTickSpacing(5);
         opacitySlider.setPaintTicks(true);
         opacitySlider.setPaintLabels(true);
-        volumeSlider.setSnapToTicks(true);
-        volumeSlider.addChangeListener(e -> {
+        opacitySlider.setSnapToTicks(true);
+        opacitySlider.addChangeListener(e -> {
             configuration.setProperty("opacity", opacitySlider.getValue());
         });
         add(opacitySlider, "wrap");
@@ -64,6 +64,7 @@ public class OptionsFrame extends JFrame {
         JButton applyButton = new JButton("Apply");
         JButton cancelButton = new JButton("Close");
 
+        applyButton.addActionListener(e -> AppConfig.saveConfig());
         cancelButton.addActionListener(e -> dispose());
 
         add(applyButton, "span, split 2, center");
