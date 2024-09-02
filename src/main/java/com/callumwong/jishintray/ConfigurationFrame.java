@@ -9,12 +9,36 @@ public class ConfigurationFrame extends JFrame {
         super();
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLayout(new MigLayout("insets 10 10 10 10", "[]", "[]"));
+        setLayout(new MigLayout("insets 20 20 20 20", "[]", "[]"));
 
-        JLabel messageLabel = new JLabel("configuration");
-        add(messageLabel, "wrap");
+        add(new JLabel("Start at login"));
+        JCheckBox startAtLoginCheckbox = new JCheckBox();
+        add(startAtLoginCheckbox, "wrap");
+
+        // Add a slider
+        add(new JLabel("Opacity"));
+        JSlider opacitySlider = new JSlider(0, 100, 80);
+        opacitySlider.setMajorTickSpacing(25);
+        opacitySlider.setMinorTickSpacing(5);
+        opacitySlider.setPaintTicks(true);
+        opacitySlider.setPaintLabels(true);
+        add(opacitySlider, "wrap");
+
+        add(new JLabel("Theme"));
+        JComboBox<String> settingsComboBox = new JComboBox<>(new String[]{"Dark", "Light", "System"});
+        add(settingsComboBox, "wrap");
+
+        JButton applyButton = new JButton("Apply");
+        JButton cancelButton = new JButton("Close");
+
+        cancelButton.addActionListener(e -> dispose());
+
+        add(applyButton, "span, split 2, center");
+        add(cancelButton);
 
         pack();
+
+        setTitle("Options");
         setLocationRelativeTo(null);
         setVisible(visible);
     }

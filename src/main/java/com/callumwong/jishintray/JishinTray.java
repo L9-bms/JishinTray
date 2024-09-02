@@ -1,6 +1,6 @@
 package com.callumwong.jishintray;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import dorkbox.systemTray.MenuItem;
 import dorkbox.systemTray.SystemTray;
 import org.slf4j.Logger;
@@ -16,8 +16,10 @@ public class JishinTray {
     public static void main(String[] args) {
         logger.info("Starting JishinTray");
 
+        System.setProperty("apple.awt.enableTemplateImages", "true");
+
         try {
-            UIManager.setLookAndFeel(new FlatDarkLaf());
+            UIManager.setLookAndFeel(new FlatMacLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
             throw new RuntimeException(e);
         }
@@ -32,14 +34,19 @@ public class JishinTray {
 
         URL url = JishinTray.class.getClassLoader().getResource("icon.png");
         tray.setImage(url);
-        tray.setStatus("test");
-        tray.getMenu().add(new MenuItem("Open", e -> {
+
+        tray.setStatus("Connected to P2PQuake");
+        tray.getMenu().add(new MenuItem("Options", e -> {
             configurationFrame.setVisible(true);
             configurationFrame.toFront();
             configurationFrame.requestFocus();
         }));
+        tray.getMenu().add(new MenuItem("About", e -> {
 
-        P2PQuakeClient c = new P2PQuakeClient(URI.create("wss://api-realtime-sandbox.p2pquake.net/v2/ws"));
+        }));
+
+//        P2PQuakeClient c = new P2PQuakeClient(URI.create("wss://api-realtime-sandbox.p2pquake.net/v2/ws"));
+        P2PQuakeClient c = new P2PQuakeClient(URI.create("wss://api.p2pquake.net/v2/ws"));
         c.connect();
     }
 }

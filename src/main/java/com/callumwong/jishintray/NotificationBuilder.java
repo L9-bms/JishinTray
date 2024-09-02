@@ -1,13 +1,13 @@
 package com.callumwong.jishintray;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 
 public class NotificationBuilder {
     private String title;
     private String description;
     private Map<String, String> fields;
-    private URI image;
+    private URL image;
 
     public NotificationBuilder setTitle(String title) {
         this.title = title;
@@ -24,7 +24,7 @@ public class NotificationBuilder {
         return this;
     }
 
-    public NotificationBuilder setImage(URI image) {
+    public NotificationBuilder setImage(URL image) {
         this.image = image;
         return this;
     }

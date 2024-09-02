@@ -11,7 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class P2PQuakeClient extends WebSocketClient {
@@ -53,28 +58,78 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
-                    String imageUrl = String.format("https://www.p2pquake.net/app/images/%s_trim_big.png", id);
-                    logger.info(jmaQuake.getIssue().toString());
-                    SwingUtilities.invokeLater(() -> new NotificationBuilder()
-                            .setTitle("title")
-                            .setDescription("description")
-                            .setImage(URI.create(imageUrl))
-                            .createNotification());
+                    String imageUrl = String.format("https://cdn.p2pquake.net/app/images/%s_trim_big.png", id);
+//                    String imageUrl = "https://cdn.p2pquake.net/app/images/66d453c4d616be440743d431_trim_big.png";
+                    logger.info(jmaQuake.toString());
+
+                    NotificationBuilder builder = new NotificationBuilder();
+                    String description = String.format("Issued on %s", jmaQuake.getIssue().getTime());
+                    Map<String, String> fields = new HashMap<>();
+
+                    try {
+                        builder.setImage(URI.create(imageUrl).toURL());
+                    } catch (MalformedURLException e) {
+                        logger.error("error setting image", e);
+                    }
 
                     switch (jmaQuake.getIssue().getType()) {
                         case SCALE_PROMPT -> {
+                            builder.setTitle("Earthquake Seismic Intensity Information");
+                            description += "<br />Epicenter and tsunami information is under investigation.";
+                            fields.put("Maximum Intensity", jmaQuake.getEarthquake().getMaxScale().toString());
+
+                            Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
+                            for (JMAQuakeAllOfPoints point : jmaQuake.getPoints()) {
+                                JMAQuakeAllOfPoints.ScaleEnum scale = point.getScale();
+
+                                if (!groupedIntensities.containsKey(scale)) {
+                                    groupedIntensities.put(scale, new ArrayList<>());
+                                }
+                                groupedIntensities.get(scale).add(point.getAddr());
+                            }
+
+                            groupedIntensities.forEach((scaleEnum, prefs) ->
+                                    fields.put(scaleEnum.getValue().toString(), String.join("<br />", prefs)));
                         }
                         case DESTINATION -> {
+                            builder.setTitle("Earthquake Epicenter Information");
+                            fields.put("Hypocenter", String.format("%s (%s, %s)",
+                                    jmaQuake.getEarthquake().getHypocenter().getName(),
+                                    jmaQuake.getEarthquake().getHypocenter().getLatitude(),
+                                    jmaQuake.getEarthquake().getHypocenter().getLongitude()
+                            ));
+                            fields.put("Magnitude", jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
+                            fields.put("Depth", jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
                         }
-                        case SCALE_AND_DESTINATION -> {
-                        }
-                        case DETAIL_SCALE -> {
-                        }
-                        case FOREIGN -> {
-                        }
-                        case OTHER -> {
+                        default -> {
+                            builder.setTitle(switch (jmaQuake.getIssue().getType()) {
+                                case SCALE_AND_DESTINATION:
+                                case DETAIL_SCALE:
+                                    yield "Earthquake Information";
+                                case FOREIGN:
+                                    yield "Foreign Earthquake Information";
+                                case OTHER:
+                                    yield "Other Earthquake Information";
+                                default:
+                                    throw new IllegalStateException("Unexpected value: " + jmaQuake.getIssue().getType());
+                            });
+
+                            fields.put("Hypocenter", String.format("%s (%s, %s)",
+                                    jmaQuake.getEarthquake().getHypocenter().getName(),
+                                    jmaQuake.getEarthquake().getHypocenter().getLatitude(),
+                                    jmaQuake.getEarthquake().getHypocenter().getLongitude()
+                            ));
+                            fields.put("Magnitude", jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
+                            fields.put("Depth", jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
+                            fields.put("Maximum Intensity", jmaQuake.getEarthquake().getMaxScale().toString());
+                            fields.put("Tsunami", jmaQuake.getEarthquake().getDomesticTsunami().getValue());
+                            fields.put("Foreign Tsunami", jmaQuake.getEarthquake().getForeignTsunami().getValue());
                         }
                     }
+
+                    builder.setDescription("<html>" + description + "</html>").setFields(fields);
+
+                    SwingUtilities.invokeLater(builder::createNotification);
 
                     break;
                 case 552: // Tsunami information
@@ -83,7 +138,12 @@ public class P2PQuakeClient extends WebSocketClient {
                     break;
                 case 554: // EEW detection
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
-                    logger.info("EEW DETECTEDEWOOOO");
+
+                    SwingUtilities.invokeLater(() -> new NotificationBuilder()
+                            .setTitle("Earthquake Early Warning")
+                            .setDescription("An earthquake early warning has been issued.")
+                            .createNotification());
+
                     break;
                 case 556: // EEW alert
                     EEW eew = mapper.readValue(message, EEW.class);
@@ -105,7 +165,12 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        logger.info("disconnected");
+        logger.info("kicked out from socket, reconnecting...");
+        try {
+            reconnectBlocking();
+        } catch (InterruptedException e) {
+            logger.error("error reconnecting to socket", e);
+        }
     }
 
     @Override
