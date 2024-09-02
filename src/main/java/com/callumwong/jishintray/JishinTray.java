@@ -1,6 +1,7 @@
 package com.callumwong.jishintray;
 
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import dorkbox.systemTray.MenuItem;
 import dorkbox.systemTray.SystemTray;
 import org.slf4j.Logger;
@@ -11,20 +12,27 @@ import java.net.URI;
 import java.net.URL;
 
 public class JishinTray {
+    public static final String APP_NAME = "JishinTray";
+    public static final String APP_AUTHOR = "65-7a";
+    public static final String APP_VERSION = JishinTray.class.getPackage().getImplementationVersion();
+
     private static final Logger logger = LoggerFactory.getLogger(JishinTray.class);
 
     public static void main(String[] args) {
         logger.info("Starting JishinTray");
 
+        AppConfig.loadConfig();
+        if (AppConfig.getConfig() == null) throw new RuntimeException();
+
         System.setProperty("apple.awt.enableTemplateImages", "true");
 
         try {
-            UIManager.setLookAndFeel(new FlatMacLightLaf());
+            UIManager.setLookAndFeel(AppConfig.getConfig().getString("theme", "Dark").equals("Dark") ? new FlatDarkLaf() : new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
             throw new RuntimeException(e);
         }
 
-        ConfigurationFrame configurationFrame = new ConfigurationFrame(false);
+        OptionsFrame configurationFrame = new OptionsFrame(false);
 
         SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.Swing;
         SystemTray tray = SystemTray.get();
