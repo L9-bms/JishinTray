@@ -166,11 +166,9 @@ public class P2PQuakeClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         logger.info("kicked out from socket, reconnecting...");
-        try {
-            reconnectBlocking();
-        } catch (InterruptedException e) {
-            logger.error("error reconnecting to socket", e);
-        }
+        Thread reconnectThread = new Thread(this::reconnect);
+
+        reconnectThread.start();
     }
 
     @Override

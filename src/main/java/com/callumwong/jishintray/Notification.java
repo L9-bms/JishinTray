@@ -37,10 +37,19 @@ public class Notification extends JFrame {
         createUI();
         pack();
 
-        // Set window size
-        Rectangle usableBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        int x = usableBounds.width - getWidth();
-        int y = usableBounds.height - getHeight();
+        // https://stackoverflow.com/questions/14431467/how-do-i-determine-the-position-of-the-system-tray-on-the-screen/
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        Rectangle bounds = gd.getDefaultConfiguration().getBounds();
+        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gd.getDefaultConfiguration());
+
+        Rectangle safeBounds = new Rectangle(bounds);
+        safeBounds.x += insets.left;
+        safeBounds.y += insets.top;
+        safeBounds.width -= (insets.left + insets.right);
+        safeBounds.height -= (insets.top + insets.bottom);
+
+        int x = safeBounds.width + safeBounds.x - getWidth();
+        int y = safeBounds.height + safeBounds.y - getHeight();
         setLocation(x, y);
 
         setVisible(true);
@@ -51,8 +60,7 @@ public class Notification extends JFrame {
     }
 
     private @NotNull Timer fadeOpacityTimer() {
-        Timer delayTimer = new Timer(10000, e -> {
-            // Start the fade-in after 10 seconds
+        Timer delayTimer = new Timer(10000, e -> { // Start the fade-in after 10 seconds
             ((Timer) e.getSource()).stop(); // Stop the delay timer
 
             // Timer to gradually fade out the JFrame
@@ -61,6 +69,8 @@ public class Notification extends JFrame {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    if (!isShowing()) return;
+
                     // Check if mouse hovering, if so then set opacity to 1
                     Point mousePos = MouseInfo.getPointerInfo().getLocation();
                     Rectangle bounds = getBounds();
@@ -97,12 +107,14 @@ public class Notification extends JFrame {
         descriptionLabel.setFont(new Font(descriptionLabel.getFont().getFontName(), Font.BOLD, 14));
         panel.add(descriptionLabel, "wrap, span");
 
-        fields.forEach((key, value) -> {
-            JLabel nameLabel = new JLabel(key);
-            JLabel valueLabel = new JLabel(value);
-            panel.add(nameLabel);
-            panel.add(valueLabel, "wrap");
-        });
+        if (fields != null){
+            fields.forEach((key, value) -> {
+                JLabel nameLabel = new JLabel(key);
+                JLabel valueLabel = new JLabel(value);
+                panel.add(nameLabel);
+                panel.add(valueLabel, "wrap");
+            });
+        }
 
         try {
             BufferedImage image = ImageIO.read(this.image);
