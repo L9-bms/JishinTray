@@ -1,5 +1,6 @@
 package com.callumwong.jishintray;
 
+import net.harawata.appdirs.AppDirs;
 import net.harawata.appdirs.AppDirsFactory;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -16,20 +17,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AppConfig {
-    private static final String CONFIGURATION_PATH = AppDirsFactory.getInstance().getUserConfigDir(
-            JishinTray.APP_NAME,
-            JishinTray.APP_VERSION,
-            JishinTray.APP_AUTHOR
-    );
-
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
-    private static final Configurations configs = new Configurations();
 
-    public static FileBasedConfigurationBuilder<PropertiesConfiguration> configBuilder;
+    private final FileBasedConfigurationBuilder<PropertiesConfiguration> builder;
 
-    public static void loadConfig() {
-        Path dir = Paths.get(CONFIGURATION_PATH);
+    private static AppConfig INSTANCE;
 
+    public AppConfig() throws ConfigurationException {
+        AppDirs appDirs = AppDirsFactory.getInstance();
+        String appDir = appDirs.getUserDataDir(JishinTray.APP_NAME, JishinTray.APP_VERSION, JishinTray.APP_AUTHOR, true);
+
+        Path dir = Paths.get(appDir);
         if (!Files.exists(dir)) {
             try {
                 Files.createDirectories(dir);
@@ -38,31 +36,51 @@ public class AppConfig {
             }
         }
 
-        File file = new File(CONFIGURATION_PATH, "config.properties");
+        File file = new File(appDir, "config.properties");
         try {
-            if (!file.exists()) file.createNewFile();
+            if (!file.exists()) {
+                if (!file.createNewFile()) {
+                    throw new RuntimeException("Unable to create new config file");
+                }
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        configBuilder = configs.propertiesBuilder(file);
+        Configurations configs = new Configurations();
+        builder = configs.propertiesBuilder(file);
     }
 
-    public static Configuration getConfig() {
+    public Configuration getConfig() {
         try {
-            return configBuilder.getConfiguration();
+            return builder.getConfiguration();
         } catch (ConfigurationException e) {
-            logger.error("failed to get configuration", e);
+            throw new RuntimeException(e);
         }
-
-        return null;
     }
 
-    public static void saveConfig() {
+    public FileBasedConfigurationBuilder<PropertiesConfiguration> getConfigBuilder() {
+        return builder;
+    }
+
+    public void saveConfig() {
         try {
-            configBuilder.save();
+            builder.save();
+            logger.info("saved config");
         } catch (ConfigurationException e) {
             logger.error("failed to save configuration", e);
         }
+    }
+
+    public static AppConfig getInstance() {
+        if (INSTANCE == null) {
+            try {
+                INSTANCE = new AppConfig();
+            } catch (ConfigurationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return INSTANCE;
     }
 }

@@ -3,6 +3,7 @@ package com.callumwong.jishintray;
 import java.net.URL;
 import java.util.Map;
 
+@SuppressWarnings("UnusedReturnValue")
 public class NotificationBuilder {
     private String title;
     private String description;

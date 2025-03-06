@@ -1,7 +1,10 @@
 package com.callumwong.jishintray;
 
 import net.miginfocom.swing.MigLayout;
+import org.apache.commons.configuration2.Configuration;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,25 +18,34 @@ import java.net.URL;
 import java.util.Map;
 
 public class Notification extends JFrame {
+    private static final Logger logger = LoggerFactory.getLogger(Notification.class);
+
     private final String title;
     private final String description;
     private final Map<String, String> fields;
     private final URL image;
 
-    private float initialOpacity;
+    private final Configuration config;
+    private final float initialOpacity;
 
     public Notification(String title, String description, Map<String, String> fields, URL image) {
         // Create window
         super();
+
+        config = AppConfig.getInstance().getConfig();
 
         this.title = title;
         this.description = description;
         this.fields = fields;
         this.image = image;
 
+        initialOpacity = (float) config.getInt("opacity", 75) / 100f;
+
         setUndecorated(true);
+        setOpacity(initialOpacity);
         setAlwaysOnTop(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setFocusableWindowState(false);
         createUI();
         pack();
 
@@ -54,13 +66,14 @@ public class Notification extends JFrame {
 
         setVisible(true);
 
-        initialOpacity = (float) AppConfig.getConfig().getInt("opacity", 80) / 100f;
-        Timer delayTimer = fadeOpacityTimer();
-        delayTimer.start();
+        if (config.getBoolean("fade_out", true)) {
+            Timer delayTimer = fadeOpacityTimer();
+            delayTimer.start();
+        }
     }
 
     private @NotNull Timer fadeOpacityTimer() {
-        Timer delayTimer = new Timer(10000, e -> { // Start the fade-in after 10 seconds
+        Timer delayTimer = new Timer(config.getInt("fade_out_delay", 10) * 1000, e -> {
             ((Timer) e.getSource()).stop(); // Stop the delay timer
 
             // Timer to gradually fade out the JFrame
@@ -76,10 +89,10 @@ public class Notification extends JFrame {
                     Rectangle bounds = getBounds();
                     bounds.setLocation(getLocationOnScreen());
                     if (bounds.contains(mousePos)) {
-                        opacity = 1f;
+                        opacity = initialOpacity;
                     }
 
-                    opacity -= 0.02f; // Decrement the opacity
+                    opacity -= 0.02f * initialOpacity; // Decrement the opacity
                     if (opacity <= 0f) {
                         opacity = 0f;
                         ((Timer) e.getSource()).stop(); // Stop the timer once no longer visible
@@ -103,14 +116,14 @@ public class Notification extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new MigLayout("insets 10 10 10 10", "[]10[]", "[]"));
 
-        JLabel descriptionLabel = new JLabel(description);
+        JLabel descriptionLabel = new JLabel("<html>" + description + "</html>");
         descriptionLabel.setFont(new Font(descriptionLabel.getFont().getFontName(), Font.BOLD, 14));
         panel.add(descriptionLabel, "wrap, span");
 
         if (fields != null){
             fields.forEach((key, value) -> {
-                JLabel nameLabel = new JLabel(key);
-                JLabel valueLabel = new JLabel(value);
+                JLabel nameLabel = new JLabel("<html>" + key + "</html>");
+                JLabel valueLabel = new JLabel("<html>" + value + "</html>");
                 panel.add(nameLabel);
                 panel.add(valueLabel, "wrap");
             });
@@ -129,7 +142,7 @@ public class Notification extends JFrame {
 
             panel.add(imageLabel, "align center, span, wrap");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error("failed to add image: {}", e.getMessage());
         }
 
         JButton closeButton = new JButton("Dismiss");

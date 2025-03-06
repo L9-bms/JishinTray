@@ -59,7 +59,6 @@ public class P2PQuakeClient extends WebSocketClient {
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
                     String imageUrl = String.format("https://cdn.p2pquake.net/app/images/%s_trim_big.png", id);
-//                    String imageUrl = "https://cdn.p2pquake.net/app/images/66d453c4d616be440743d431_trim_big.png";
                     logger.info(jmaQuake.toString());
 
                     NotificationBuilder builder = new NotificationBuilder();
@@ -76,30 +75,28 @@ public class P2PQuakeClient extends WebSocketClient {
                         case SCALE_PROMPT -> {
                             builder.setTitle("Earthquake Seismic Intensity Information");
                             description += "<br />Epicenter and tsunami information is under investigation.";
-                            fields.put("Maximum Intensity", jmaQuake.getEarthquake().getMaxScale().toString());
-
-                            Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
-                            for (JMAQuakeAllOfPoints point : jmaQuake.getPoints()) {
-                                JMAQuakeAllOfPoints.ScaleEnum scale = point.getScale();
-
-                                if (!groupedIntensities.containsKey(scale)) {
-                                    groupedIntensities.put(scale, new ArrayList<>());
-                                }
-                                groupedIntensities.get(scale).add(point.getAddr());
+                            if (jmaQuake.getEarthquake().getMaxScale() != null) {
+                                fields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
                             }
 
-                            groupedIntensities.forEach((scaleEnum, prefs) ->
-                                    fields.put(scaleEnum.getValue().toString(), String.join("<br />", prefs)));
+                            Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
+                            if (jmaQuake.getPoints() != null) {
+                                for (JMAQuakeAllOfPoints point : jmaQuake.getPoints()) {
+                                    JMAQuakeAllOfPoints.ScaleEnum scale = point.getScale();
+
+                                    if (!groupedIntensities.containsKey(scale)) {
+                                        groupedIntensities.put(scale, new ArrayList<>());
+                                    }
+                                    groupedIntensities.get(scale).add(point.getAddr());
+                                }
+                            }
+
+                            groupedIntensities.forEach((scale, prefs) ->
+                                    fields.put(Util.scaleToString(scale.getValue()), String.join("<br />", prefs)));
                         }
                         case DESTINATION -> {
                             builder.setTitle("Earthquake Epicenter Information");
-                            fields.put("Hypocenter", String.format("%s (%s, %s)",
-                                    jmaQuake.getEarthquake().getHypocenter().getName(),
-                                    jmaQuake.getEarthquake().getHypocenter().getLatitude(),
-                                    jmaQuake.getEarthquake().getHypocenter().getLongitude()
-                            ));
-                            fields.put("Magnitude", jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
-                            fields.put("Depth", jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
+                            addHypocenterInfo(jmaQuake, fields);
                         }
                         default -> {
                             builder.setTitle(switch (jmaQuake.getIssue().getType()) {
@@ -114,20 +111,20 @@ public class P2PQuakeClient extends WebSocketClient {
                                     throw new IllegalStateException("Unexpected value: " + jmaQuake.getIssue().getType());
                             });
 
-                            fields.put("Hypocenter", String.format("%s (%s, %s)",
-                                    jmaQuake.getEarthquake().getHypocenter().getName(),
-                                    jmaQuake.getEarthquake().getHypocenter().getLatitude(),
-                                    jmaQuake.getEarthquake().getHypocenter().getLongitude()
-                            ));
-                            fields.put("Magnitude", jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
-                            fields.put("Depth", jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
-                            fields.put("Maximum Intensity", jmaQuake.getEarthquake().getMaxScale().toString());
-                            fields.put("Tsunami", jmaQuake.getEarthquake().getDomesticTsunami().getValue());
-                            fields.put("Foreign Tsunami", jmaQuake.getEarthquake().getForeignTsunami().getValue());
+                            addHypocenterInfo(jmaQuake, fields);
+                            if (jmaQuake.getEarthquake().getMaxScale() != null) {
+                                fields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
+                            }
+                            if (jmaQuake.getEarthquake().getDomesticTsunami() != null) {
+                                fields.put("Tsunami", jmaQuake.getEarthquake().getDomesticTsunami().getValue());
+                            }
+                            if (jmaQuake.getEarthquake().getForeignTsunami() != null) {
+                                fields.put("Foreign Tsunami", jmaQuake.getEarthquake().getForeignTsunami().getValue());
+                            }
                         }
                     }
 
-                    builder.setDescription("<html>" + description + "</html>").setFields(fields);
+                    builder.setDescription(description).setFields(fields);
 
                     SwingUtilities.invokeLater(builder::createNotification);
 
@@ -160,6 +157,22 @@ public class P2PQuakeClient extends WebSocketClient {
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void addHypocenterInfo(JMAQuake jmaQuake, Map<String, String> fields) {
+        if (jmaQuake.getEarthquake().getHypocenter() != null) {
+            fields.put("Hypocenter", String.format("%s (%s, %s)",
+                    jmaQuake.getEarthquake().getHypocenter().getName(),
+                    jmaQuake.getEarthquake().getHypocenter().getLatitude(),
+                    jmaQuake.getEarthquake().getHypocenter().getLongitude()
+            ));
+        }
+        if (jmaQuake.getEarthquake().getHypocenter().getMagnitude() != null) {
+            fields.put("Magnitude", jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
+        }
+        if (jmaQuake.getEarthquake().getHypocenter().getDepth() != null) {
+            fields.put("Depth", jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
         }
     }
 
