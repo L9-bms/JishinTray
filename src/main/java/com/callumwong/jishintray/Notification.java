@@ -128,20 +128,22 @@ public class Notification extends JFrame {
             });
         }
 
-        try {
-            BufferedImage image = ImageIO.read(this.image);
+        if (image != null) {
+            try {
+                BufferedImage image = ImageIO.read(this.image);
 
-            int desiredWidth = 320;
-            int originalWidth = image.getWidth();
-            int originalHeight = image.getHeight();
-            int scaledHeight = (int) (((double) originalHeight / originalWidth) * desiredWidth);
+                int desiredWidth = 320;
+                int originalWidth = image.getWidth();
+                int originalHeight = image.getHeight();
+                int scaledHeight = (int) (((double) originalHeight / originalWidth) * desiredWidth);
 
-            ImageIcon imageIcon = new ImageIcon(image.getScaledInstance(desiredWidth, scaledHeight, Image.SCALE_FAST));
-            JLabel imageLabel = new JLabel(imageIcon);
+                ImageIcon imageIcon = new ImageIcon(image.getScaledInstance(desiredWidth, scaledHeight, Image.SCALE_FAST));
+                JLabel imageLabel = new JLabel(imageIcon);
 
-            panel.add(imageLabel, "align center, span, wrap");
-        } catch (IOException e) {
-            logger.error("failed to add image: {}", e.getMessage());
+                panel.add(imageLabel, "align center, span, wrap");
+            } catch (IOException e) {
+                logger.error("failed to add image: {}", e.getMessage());
+            }
         }
 
         JButton closeButton = new JButton("Dismiss");

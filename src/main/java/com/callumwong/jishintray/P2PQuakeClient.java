@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
+import java.awt.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -58,21 +59,19 @@ public class P2PQuakeClient extends WebSocketClient {
             }
 
             NotificationBuilder builder = new NotificationBuilder();
+            String imageUrl = String.format("https://cdn.p2pquake.net/app/images/%s_trim_big.png", id);
+            try {
+                builder.setImage(URI.create(imageUrl).toURL());
+            } catch (MalformedURLException e) {
+                logger.error("error setting image", e);
+            }
 
             switch (code) {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
-                    String imageUrl = String.format("https://cdn.p2pquake.net/app/images/%s_trim_big.png", id);
                     String earthquakeDescription = String.format("Issued on %s", jmaQuake.getIssue().getTime());
-
                     Map<String, String> earthquakeFields = new HashMap<>();
-
-                    try {
-                        builder.setImage(URI.create(imageUrl).toURL());
-                    } catch (MalformedURLException e) {
-                        logger.error("error setting image", e);
-                    }
 
                     if (jmaQuake.getEarthquake().getMaxScale() != null) {
                         earthquakeFields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
@@ -134,7 +133,7 @@ public class P2PQuakeClient extends WebSocketClient {
                     builder.setTitle("Tsunami Information");
 
                     String tsunamiDescription = String.format("Issued on %s", jmaTsunami.getIssue().getTime());
-                    Map<String, JTable> tsunamiFields = new HashMap<>();
+                    Map<String, JScrollPane> tsunamiFields = new HashMap<>();
 
                     Map<JMATsunamiAllOfAreas.GradeEnum, List<JMATsunamiAllOfAreas>> groupedTsunami = new HashMap<>();
                     if (jmaTsunami.getCancelled()) {
@@ -153,7 +152,7 @@ public class P2PQuakeClient extends WebSocketClient {
                     }
 
                     groupedTsunami.forEach((grade, area) -> {
-                        List<String[]> rows = area.stream().map(a -> {
+                        List<String[]> tableRows = area.stream().map(a -> {
                             String firstHeight = "N/A";
                             if (a.getFirstHeight() != null) {
                                 if (a.getFirstHeight().getCondition() != null) {
@@ -175,7 +174,7 @@ public class P2PQuakeClient extends WebSocketClient {
                         TableModel tableModel = new AbstractTableModel() {
                             @Override
                             public int getRowCount() {
-                                return rows.size();
+                                return tableRows.size();
                             }
 
                             @Override
@@ -190,11 +189,25 @@ public class P2PQuakeClient extends WebSocketClient {
 
                             @Override
                             public Object getValueAt(int rowIndex, int columnIndex) {
-                                return rows.get(rowIndex)[columnIndex];
+                                return tableRows.get(rowIndex)[columnIndex];
                             }
                         };
 
-                        tsunamiFields.put(Util.gradeToString(grade), new JTable(tableModel));
+                        JTable table = new JTable(tableModel);
+
+                        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                        TableColumnAdjuster tca = new TableColumnAdjuster(table);
+                        tca.adjustColumns();
+
+                        int cols = table.getColumnModel().getTotalColumnWidth();
+                        int rows = table.getRowHeight() * table.getRowCount();
+                        Dimension d = new Dimension(cols, rows);
+                        table.setPreferredScrollableViewportSize(d);
+
+                        JScrollPane jScrollPane = new JScrollPane();
+                        jScrollPane.getViewport().add(table);
+
+                        tsunamiFields.put(Util.gradeToString(grade), jScrollPane);
                     });
 
                     builder.setDescription(tsunamiDescription).setFields(tsunamiFields);
@@ -216,9 +229,9 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     builder.setTitle("Earthquake Early Warning");
                     String eewDescription = """
-                                        An earthquake early warning has been issued.<br />
-                                        In the following prefectures, please beware of strong tremors.
-                                        """;
+                            An earthquake early warning has been issued.<br />
+                            In the following prefectures, please beware of strong tremors.
+                            """;
 
                     if (Boolean.TRUE.equals(eew.getTest())) return;
                     if (eew.getAreas() != null) {
