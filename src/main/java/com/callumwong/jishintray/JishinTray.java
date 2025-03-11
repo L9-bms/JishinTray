@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
 
@@ -34,11 +35,19 @@ public class JishinTray {
 
         initTray();
 
-        P2PQuakeClient wsClient = new P2PQuakeClient(URI.create("wss://api-realtime-sandbox.p2pquake.net/v2/ws"));
-//        P2PQuakeClient wsClient = new P2PQuakeClient(URI.create("wss://api.p2pquake.net/v2/ws"));
-        wsClient.connect();
+        String webSocketUrl = System.getenv("JISHINTRAY_WEBSOCKET_URL");
+        if (webSocketUrl == null) {
+            webSocketUrl = "wss://api.p2pquake.net/v2/ws";
+        }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(wsClient::close));
+        try {
+            P2PQuakeClient wsClient = new P2PQuakeClient(new URI(webSocketUrl));
+            wsClient.connect();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(wsClient::close));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("invalid websocket url", e);
+        }
     }
 
     private void initTray() {
