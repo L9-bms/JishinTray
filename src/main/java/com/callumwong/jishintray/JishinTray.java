@@ -1,6 +1,7 @@
 package com.callumwong.jishintray;
 
 import com.callumwong.jishintray.config.AppConfig;
+import com.callumwong.jishintray.frame.AboutFrame;
 import com.callumwong.jishintray.frame.OptionsFrame;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -54,6 +55,7 @@ public class JishinTray {
 
     private void initTray() {
         OptionsFrame configurationFrame = new OptionsFrame(false);
+        AboutFrame aboutFrame = new AboutFrame(false);
 
         SystemTray tray = SystemTray.get();
         if (tray == null) {
@@ -71,7 +73,9 @@ public class JishinTray {
             configurationFrame.requestFocus();
         }));
         tray.getMenu().add(new MenuItem("About", e -> {
-            // TODO
+            aboutFrame.setVisible(true);
+            aboutFrame.toFront();
+            aboutFrame.requestFocus();
         }));
         tray.getMenu().add(new JSeparator());
         tray.getMenu().add(new MenuItem("Exit", e -> System.exit(0)));

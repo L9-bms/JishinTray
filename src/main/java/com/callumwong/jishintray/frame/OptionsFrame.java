@@ -4,7 +4,6 @@ import com.callumwong.jishintray.config.AppConfig;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
-import net.miginfocom.swing.MigLayout;
 import org.apache.commons.configuration2.Configuration;
 
 import javax.swing.*;
@@ -12,26 +11,15 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.io.IOException;
 
-public class OptionsFrame extends JFrame {
-    private final Configuration config;
-
+public class OptionsFrame extends DialogFrame {
     public OptionsFrame(boolean visible) {
-        super();
-
-        config = AppConfig.getInstance().getConfig();
-
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLayout(new MigLayout("insets 20 20 20 20", "[]", "[]"));
-
-        createUI();
-        pack();
-
-        setTitle("Options");
-        setLocationRelativeTo(null);
-        setVisible(visible);
+        super(visible);
     }
 
-    private void createUI() {
+    @Override
+    protected void createUI() {
+        Configuration config = AppConfig.getInstance().getConfig();
+
         add(new JLabel("Theme"));
         JComboBox<String> settingsComboBox = new JComboBox<>(new String[]{"Dark", "Light"});
         settingsComboBox.setSelectedItem(config.getString("theme", "Dark"));
