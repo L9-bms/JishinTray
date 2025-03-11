@@ -43,15 +43,21 @@ application {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     manifest {
         attributes 'Implementation-Title': "JishinTray",
                 'Implementation-Version': version,
                 'Main-Class': 'com.callumwong.jishintray.JishinTray'
     }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 runtime {
-    modules = ['java.naming', 'java.xml']
+    modules = ['java.naming', 'java.xml', 'java.desktop', 'java.sql', 'jdk.crypto.ec']
     jpackage {
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
         if (currentOs.windows) {
@@ -86,14 +92,14 @@ openApiGenerate {
     outputDir.set(rootProject.layout.buildDirectory.dir("generated").get().getAsFile().path)
     configOptions.set([
             disallowAdditionalPropertiesIfNotPresent: "false",
-            dateLibrary: "java8",
-            library: "native"
+            dateLibrary                             : "java8",
+            library                                 : "native"
     ])
     apiPackage.set("com.callumwong.jishintray.api")
     modelPackage.set("com.callumwong.jishintray.model")
     globalProperties.set([
             generateSupportingFiles: "false",
-            generateApis: "false"
+            generateApis           : "false"
     ])
 }
 

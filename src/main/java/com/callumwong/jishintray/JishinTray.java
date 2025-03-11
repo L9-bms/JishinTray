@@ -30,7 +30,7 @@ public class JishinTray {
         try {
             UIManager.setLookAndFeel(config.getString("theme", "Dark").equals("Dark") ? new FlatDarkLaf() : new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
-            throw new RuntimeException(e);
+            logger.error("unsupported look and feel", e);
         }
 
         initTray();
