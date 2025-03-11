@@ -1,6 +1,9 @@
 package com.callumwong.jishintray;
 
+import com.callumwong.jishintray.frame.NotificationFrame;
 import com.callumwong.jishintray.model.*;
+import com.callumwong.jishintray.util.EnumUtil;
+import com.callumwong.jishintray.util.TableColumnAdjuster;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -64,7 +67,7 @@ public class P2PQuakeClient extends WebSocketClient {
                 return;
             }
 
-            NotificationBuilder builder = new NotificationBuilder();
+            NotificationFrame.Builder builder = new NotificationFrame.Builder();
             String imageUrl = String.format("https://cdn.p2pquake.net/app/images/%s_trim_big.png", id);
             try {
                 builder.setImage(URI.create(imageUrl).toURL());
@@ -80,7 +83,7 @@ public class P2PQuakeClient extends WebSocketClient {
                     Map<String, String> earthquakeFields = new HashMap<>();
 
                     if (jmaQuake.getEarthquake().getMaxScale() != null) {
-                        earthquakeFields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
+                        earthquakeFields.put("Maximum Intensity", EnumUtil.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
                     }
 
                     if (jmaQuake.getIssue().getType() == JMAQuakeAllOfIssue.TypeEnum.SCALE_PROMPT) {
@@ -100,7 +103,7 @@ public class P2PQuakeClient extends WebSocketClient {
                         }
 
                         groupedIntensities.forEach((scale, prefs) -> earthquakeFields.put(
-                                String.format("Intensity %s", Util.scaleToString(scale.getValue())),
+                                String.format("Intensity %s", EnumUtil.scaleToString(scale.getValue())),
                                 String.join("<br />", prefs))
                         );
                     } else {
@@ -162,14 +165,14 @@ public class P2PQuakeClient extends WebSocketClient {
                             String firstHeight = "N/A";
                             if (a.getFirstHeight() != null) {
                                 if (a.getFirstHeight().getCondition() != null) {
-                                    firstHeight = Util.conditionToString(a.getFirstHeight().getCondition());
+                                    firstHeight = EnumUtil.conditionToString(a.getFirstHeight().getCondition());
                                 } else if (a.getFirstHeight().getArrivalTime() != null) {
                                     firstHeight = String.format("Arriving at %s", a.getFirstHeight().getArrivalTime());
                                 }
                             }
 
                             String maxHeight = a.getMaxHeight() != null && a.getMaxHeight().getDescription() != null
-                                    ? Util.maxHeightToString(a.getMaxHeight().getDescription())
+                                    ? EnumUtil.maxHeightToString(a.getMaxHeight().getDescription())
                                     : "N/A";
 
                             return new String[]{a.getName(), firstHeight, maxHeight};
@@ -213,7 +216,7 @@ public class P2PQuakeClient extends WebSocketClient {
                         JScrollPane jScrollPane = new JScrollPane();
                         jScrollPane.getViewport().add(table);
 
-                        tsunamiFields.put(Util.gradeToString(grade), jScrollPane);
+                        tsunamiFields.put(EnumUtil.gradeToString(grade), jScrollPane);
                     });
 
                     builder.setDescription(tsunamiDescription).setFields(tsunamiFields);
@@ -224,7 +227,7 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 554: // EEW detection
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
 
-                    SwingUtilities.invokeLater(() -> new NotificationBuilder()
+                    SwingUtilities.invokeLater(() -> new NotificationFrame.Builder()
                             .setTitle("Earthquake Early Warning")
                             .setDescription("An earthquake early warning has been issued.")
                             .createNotification());

@@ -1,5 +1,6 @@
-package com.callumwong.jishintray;
+package com.callumwong.jishintray.config;
 
+import com.callumwong.jishintray.JishinTray;
 import net.harawata.appdirs.AppDirs;
 import net.harawata.appdirs.AppDirsFactory;
 import org.apache.commons.configuration2.Configuration;

@@ -1,12 +1,10 @@
-package com.callumwong.jishintray;
+package com.callumwong.jishintray.util;
 
 import com.callumwong.jishintray.model.*;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public class Util {
+public class EnumUtil {
     public static String scaleToString(BigDecimal scale) {
         return scaleToString(scale.intValue());
     }

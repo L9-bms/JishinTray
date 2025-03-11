@@ -1,5 +1,6 @@
-package com.callumwong.jishintray;
+package com.callumwong.jishintray.frame;
 
+import com.callumwong.jishintray.config.AppConfig;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.configuration2.Configuration;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +16,11 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
-public class Notification extends JFrame {
-    private static final Logger logger = LoggerFactory.getLogger(Notification.class);
+public class NotificationFrame extends JFrame {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationFrame.class);
 
     private final String title;
     private final String description;
@@ -28,7 +30,7 @@ public class Notification extends JFrame {
     private final Configuration config;
     private final float initialOpacity;
 
-    public Notification(String title, String description, Map<String, JComponent> fields, URL image) {
+    public NotificationFrame(String title, String description, Map<String, JComponent> fields, URL image) {
         // Create window
         super();
 
@@ -152,5 +154,47 @@ public class Notification extends JFrame {
 
         panel.setBorder(blackline);
         add(panel, BorderLayout.CENTER);
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public static class Builder {
+        private String title;
+        private String description;
+        private Map<String, JComponent> fields;
+        private URL image;
+
+        public Builder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setFields(Map<String, ?> fields) {
+            Map<String, JComponent> map = new HashMap<>();
+            fields.forEach((key, value) -> {
+                if (value instanceof String) {
+                    map.put(key, new JLabel("<html>" + value + "</html>"));
+                } else if (value instanceof JComponent) {
+                    map.put(key, (JComponent) value);
+                } else {
+                    throw new IllegalArgumentException("Unsupported field type: " + value.getClass());
+                }
+            });
+            this.fields = map;
+            return this;
+        }
+
+        public Builder setImage(URL image) {
+            this.image = image;
+            return this;
+        }
+
+        public NotificationFrame createNotification() {
+            return new NotificationFrame(title, description, fields, image);
+        }
     }
 }

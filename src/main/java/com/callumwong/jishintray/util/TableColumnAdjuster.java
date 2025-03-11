@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-package com.callumwong.jishintray;
+package com.callumwong.jishintray.util;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;

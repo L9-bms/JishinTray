@@ -1,5 +1,7 @@
 package com.callumwong.jishintray;
 
+import com.callumwong.jishintray.config.AppConfig;
+import com.callumwong.jishintray.frame.OptionsFrame;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import dorkbox.systemTray.MenuItem;
@@ -9,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;

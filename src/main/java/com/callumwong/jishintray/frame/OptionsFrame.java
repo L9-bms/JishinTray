@@ -1,5 +1,6 @@
-package com.callumwong.jishintray;
+package com.callumwong.jishintray.frame;
 
+import com.callumwong.jishintray.config.AppConfig;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
