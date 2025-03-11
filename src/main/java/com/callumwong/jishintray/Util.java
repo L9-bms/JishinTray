@@ -1,10 +1,10 @@
 package com.callumwong.jishintray;
 
-import com.callumwong.jishintray.model.JMATsunamiAllOfAreas;
-import com.callumwong.jishintray.model.JMATsunamiAllOfFirstHeight;
-import com.callumwong.jishintray.model.JMATsunamiAllOfMaxHeight;
+import com.callumwong.jishintray.model.*;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Util {
     public static String scaleToString(BigDecimal scale) {

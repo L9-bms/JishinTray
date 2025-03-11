@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class P2PQuakeClient extends WebSocketClient {
     private static final Logger logger = LoggerFactory.getLogger(P2PQuakeClient.class);
@@ -47,7 +45,7 @@ public class P2PQuakeClient extends WebSocketClient {
             if (!node.has("code")) return;
             int code = node.get("code").asInt();
 
-            logger.info(node.toString());
+            logger.debug(node.toString());
 
             String id;
             if (node.hasNonNull("id")) {
@@ -140,7 +138,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     Map<JMATsunamiAllOfAreas.GradeEnum, List<JMATsunamiAllOfAreas>> groupedTsunami = new HashMap<>();
                     if (jmaTsunami.getCancelled()) {
-                        tsunamiDescription += "The tsunami warning has been cancelled.";
+                        tsunamiDescription += "<br /><br />This tsunami warning has been cancelled.";
                     } else {
                         if (jmaTsunami.getAreas() != null) {
                             for (JMATsunamiAllOfAreas area : jmaTsunami.getAreas()) {
@@ -215,9 +213,27 @@ public class P2PQuakeClient extends WebSocketClient {
                     break;
                 case 556: // EEW alert
                     EEW eew = mapper.readValue(message, EEW.class);
+
+                    builder.setTitle("Earthquake Early Warning");
+                    String eewDescription = """
+                                        An earthquake early warning has been issued.<br />
+                                        In the following prefectures, please beware of strong tremors.
+                                        """;
+
+                    if (Boolean.TRUE.equals(eew.getTest())) return;
                     if (eew.getAreas() != null) {
-                        logger.info("Earthquake Early Warning in: {}", eew.getAreas().stream().map(EEWAllOfAreas::getPref).collect(Collectors.joining(",")));
+                        if (eew.getCancelled()) {
+                            eewDescription = "This warning has been cancelled.<br /><br />" + eewDescription;
+                        }
+
+                        Map<String, String> eewFields = new HashMap<>();
+                        eew.getAreas().forEach(area -> eewFields.put(area.getPref(), area.getName()));
+
+                        builder.setDescription(eewDescription).setFields(eewFields);
+
+                        SwingUtilities.invokeLater(builder::createNotification);
                     }
+
                     break;
                 case 555: // Peers in area
                 case 561: // P2P Userquake
