@@ -22,13 +22,13 @@ public class Notification extends JFrame {
 
     private final String title;
     private final String description;
-    private final Map<String, String> fields;
+    private final Map<String, JComponent> fields;
     private final URL image;
 
     private final Configuration config;
     private final float initialOpacity;
 
-    public Notification(String title, String description, Map<String, String> fields, URL image) {
+    public Notification(String title, String description, Map<String, JComponent> fields, URL image) {
         // Create window
         super();
 
@@ -120,12 +120,11 @@ public class Notification extends JFrame {
         descriptionLabel.setFont(new Font(descriptionLabel.getFont().getFontName(), Font.BOLD, 14));
         panel.add(descriptionLabel, "wrap, span");
 
-        if (fields != null){
+        if (fields != null) {
             fields.forEach((key, value) -> {
-                JLabel nameLabel = new JLabel("<html>" + key + "</html>");
-                JLabel valueLabel = new JLabel("<html>" + value + "</html>");
-                panel.add(nameLabel);
-                panel.add(valueLabel, "wrap");
+                JLabel keyLabel = new JLabel("<html>" + key + "</html>");
+                panel.add(keyLabel);
+                panel.add(value, "wrap");
             });
         }
 

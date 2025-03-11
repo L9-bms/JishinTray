@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class P2PQuakeClient extends WebSocketClient {
     private static final Logger logger = LoggerFactory.getLogger(P2PQuakeClient.class);
@@ -44,6 +47,8 @@ public class P2PQuakeClient extends WebSocketClient {
             if (!node.has("code")) return;
             int code = node.get("code").asInt();
 
+            logger.info(node.toString());
+
             String id;
             if (node.hasNonNull("id")) {
                 id = node.get("id").asText();
@@ -54,16 +59,16 @@ public class P2PQuakeClient extends WebSocketClient {
                 return;
             }
 
+            NotificationBuilder builder = new NotificationBuilder();
+
             switch (code) {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
                     String imageUrl = String.format("https://cdn.p2pquake.net/app/images/%s_trim_big.png", id);
-                    logger.info(jmaQuake.toString());
+                    String earthquakeDescription = String.format("Issued on %s", jmaQuake.getIssue().getTime());
 
-                    NotificationBuilder builder = new NotificationBuilder();
-                    String description = String.format("Issued on %s", jmaQuake.getIssue().getTime());
-                    Map<String, String> fields = new HashMap<>();
+                    Map<String, String> earthquakeFields = new HashMap<>();
 
                     try {
                         builder.setImage(URI.create(imageUrl).toURL());
@@ -71,67 +76,133 @@ public class P2PQuakeClient extends WebSocketClient {
                         logger.error("error setting image", e);
                     }
 
-                    switch (jmaQuake.getIssue().getType()) {
-                        case SCALE_PROMPT -> {
-                            builder.setTitle("Earthquake Seismic Intensity Information");
-                            description += "<br />Epicenter and tsunami information is under investigation.";
-                            if (jmaQuake.getEarthquake().getMaxScale() != null) {
-                                fields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
-                            }
+                    if (jmaQuake.getEarthquake().getMaxScale() != null) {
+                        earthquakeFields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
+                    }
 
-                            Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
-                            if (jmaQuake.getPoints() != null) {
-                                for (JMAQuakeAllOfPoints point : jmaQuake.getPoints()) {
-                                    JMAQuakeAllOfPoints.ScaleEnum scale = point.getScale();
+                    if (jmaQuake.getIssue().getType() == JMAQuakeAllOfIssue.TypeEnum.SCALE_PROMPT) {
+                        builder.setTitle("Earthquake Seismic Intensity Information");
+                        earthquakeDescription += "<br />Epicenter and tsunami information is under investigation.";
 
-                                    if (!groupedIntensities.containsKey(scale)) {
-                                        groupedIntensities.put(scale, new ArrayList<>());
-                                    }
-                                    groupedIntensities.get(scale).add(point.getAddr());
+                        Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
+                        if (jmaQuake.getPoints() != null) {
+                            for (JMAQuakeAllOfPoints point : jmaQuake.getPoints()) {
+                                JMAQuakeAllOfPoints.ScaleEnum scale = point.getScale();
+
+                                if (!groupedIntensities.containsKey(scale)) {
+                                    groupedIntensities.put(scale, new ArrayList<>());
                                 }
+                                groupedIntensities.get(scale).add(point.getAddr());
                             }
-
-                            groupedIntensities.forEach((scale, prefs) ->
-                                    fields.put(Util.scaleToString(scale.getValue()), String.join("<br />", prefs)));
                         }
-                        case DESTINATION -> {
-                            builder.setTitle("Earthquake Epicenter Information");
-                            addHypocenterInfo(jmaQuake, fields);
-                        }
-                        default -> {
-                            builder.setTitle(switch (jmaQuake.getIssue().getType()) {
-                                case SCALE_AND_DESTINATION:
-                                case DETAIL_SCALE:
-                                    yield "Earthquake Information";
-                                case FOREIGN:
-                                    yield "Foreign Earthquake Information";
-                                case OTHER:
-                                    yield "Other Earthquake Information";
-                                default:
-                                    throw new IllegalStateException("Unexpected value: " + jmaQuake.getIssue().getType());
-                            });
 
-                            addHypocenterInfo(jmaQuake, fields);
-                            if (jmaQuake.getEarthquake().getMaxScale() != null) {
-                                fields.put("Maximum Intensity", Util.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
-                            }
-                            if (jmaQuake.getEarthquake().getDomesticTsunami() != null) {
-                                fields.put("Tsunami", jmaQuake.getEarthquake().getDomesticTsunami().getValue());
-                            }
-                            if (jmaQuake.getEarthquake().getForeignTsunami() != null) {
-                                fields.put("Foreign Tsunami", jmaQuake.getEarthquake().getForeignTsunami().getValue());
-                            }
+                        groupedIntensities.forEach((scale, prefs) -> earthquakeFields.put(
+                                String.format("Intensity %s", Util.scaleToString(scale.getValue())),
+                                String.join("<br />", prefs))
+                        );
+                    } else {
+                        builder.setTitle(switch (jmaQuake.getIssue().getType()) {
+                            case DESTINATION:
+                                yield "Earthquake Epicenter Information";
+                            case SCALE_AND_DESTINATION:
+                            case DETAIL_SCALE:
+                                yield "Earthquake Information";
+                            case FOREIGN:
+                                yield "Foreign Earthquake Information";
+                            case OTHER:
+                                yield "Other Earthquake Information";
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + jmaQuake.getIssue().getType());
+                        });
+
+                        addHypocenterInfo(jmaQuake, earthquakeFields);
+
+                        if (jmaQuake.getEarthquake().getDomesticTsunami() != null) {
+                            earthquakeFields.put("Tsunami", jmaQuake.getEarthquake().getDomesticTsunami().getValue());
+                        }
+                        if (jmaQuake.getEarthquake().getForeignTsunami() != null) {
+                            earthquakeFields.put("Foreign Tsunami", jmaQuake.getEarthquake().getForeignTsunami().getValue());
                         }
                     }
 
-                    builder.setDescription(description).setFields(fields);
+                    builder.setDescription(earthquakeDescription).setFields(earthquakeFields);
 
                     SwingUtilities.invokeLater(builder::createNotification);
 
                     break;
                 case 552: // Tsunami information
                     JMATsunami jmaTsunami = mapper.readValue(message, JMATsunami.class);
-                    logger.info(jmaTsunami.toString());
+
+                    builder.setTitle("Tsunami Information");
+
+                    String tsunamiDescription = String.format("Issued on %s", jmaTsunami.getIssue().getTime());
+                    Map<String, JTable> tsunamiFields = new HashMap<>();
+
+                    Map<JMATsunamiAllOfAreas.GradeEnum, List<JMATsunamiAllOfAreas>> groupedTsunami = new HashMap<>();
+                    if (jmaTsunami.getCancelled()) {
+                        tsunamiDescription += "The tsunami warning has been cancelled.";
+                    } else {
+                        if (jmaTsunami.getAreas() != null) {
+                            for (JMATsunamiAllOfAreas area : jmaTsunami.getAreas()) {
+                                JMATsunamiAllOfAreas.GradeEnum grade = area.getGrade();
+
+                                if (!groupedTsunami.containsKey(grade)) {
+                                    groupedTsunami.put(grade, new ArrayList<>());
+                                }
+                                groupedTsunami.get(grade).add(area);
+                            }
+                        }
+                    }
+
+                    groupedTsunami.forEach((grade, area) -> {
+                        List<String[]> rows = area.stream().map(a -> {
+                            String firstHeight = "N/A";
+                            if (a.getFirstHeight() != null) {
+                                if (a.getFirstHeight().getCondition() != null) {
+                                    firstHeight = Util.conditionToString(a.getFirstHeight().getCondition());
+                                } else if (a.getFirstHeight().getArrivalTime() != null) {
+                                    firstHeight = String.format("Arriving at %s", a.getFirstHeight().getArrivalTime());
+                                }
+                            }
+
+                            String maxHeight = a.getMaxHeight() != null && a.getMaxHeight().getDescription() != null
+                                    ? Util.maxHeightToString(a.getMaxHeight().getDescription())
+                                    : "N/A";
+
+                            return new String[]{a.getName(), firstHeight, maxHeight};
+                        }).toList();
+
+                        String[] columnNames = new String[]{"Area", "First Height", "Max Height"};
+
+                        TableModel tableModel = new AbstractTableModel() {
+                            @Override
+                            public int getRowCount() {
+                                return rows.size();
+                            }
+
+                            @Override
+                            public int getColumnCount() {
+                                return columnNames.length;
+                            }
+
+                            @Override
+                            public String getColumnName(int column) {
+                                return columnNames[column];
+                            }
+
+                            @Override
+                            public Object getValueAt(int rowIndex, int columnIndex) {
+                                return rows.get(rowIndex)[columnIndex];
+                            }
+                        };
+
+                        tsunamiFields.put(Util.gradeToString(grade), new JTable(tableModel));
+                    });
+
+                    builder.setDescription(tsunamiDescription).setFields(tsunamiFields);
+
+                    SwingUtilities.invokeLater(builder::createNotification);
+
                     break;
                 case 554: // EEW detection
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);

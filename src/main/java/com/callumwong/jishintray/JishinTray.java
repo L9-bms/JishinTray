@@ -34,8 +34,8 @@ public class JishinTray {
 
         initTray();
 
-//        P2PQuakeClient wsClient = new P2PQuakeClient(URI.create("wss://api-realtime-sandbox.p2pquake.net/v2/ws"));
-        P2PQuakeClient wsClient = new P2PQuakeClient(URI.create("wss://api.p2pquake.net/v2/ws"));
+        P2PQuakeClient wsClient = new P2PQuakeClient(URI.create("wss://api-realtime-sandbox.p2pquake.net/v2/ws"));
+//        P2PQuakeClient wsClient = new P2PQuakeClient(URI.create("wss://api.p2pquake.net/v2/ws"));
         wsClient.connect();
 
         Runtime.getRuntime().addShutdownHook(new Thread(wsClient::close));
