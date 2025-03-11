@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -55,21 +57,24 @@ public class JishinTray {
 
         SystemTray tray = SystemTray.get();
         if (tray == null) {
-            throw new RuntimeException("Unable to load SystemTray!");
+            logger.error("Unable to load SystemTray! Continuing...");
+            return;
         }
 
         URL url = JishinTray.class.getClassLoader().getResource("icon.png");
         tray.setImage(Objects.requireNonNull(url));
 
-        tray.setStatus("Connected to P2PQuake");
+        tray.setStatus("Initialising...");
         tray.getMenu().add(new MenuItem("Options", e -> {
             configurationFrame.setVisible(true);
             configurationFrame.toFront();
             configurationFrame.requestFocus();
         }));
         tray.getMenu().add(new MenuItem("About", e -> {
-
+            // TODO
         }));
+        tray.getMenu().add(new JSeparator());
+        tray.getMenu().add(new MenuItem("Exit", e -> System.exit(0)));
     }
 
     public static void main(String[] args) {

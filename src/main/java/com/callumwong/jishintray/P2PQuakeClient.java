@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dorkbox.systemTray.SystemTray;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
@@ -25,9 +26,13 @@ public class P2PQuakeClient extends WebSocketClient {
     private static final Logger logger = LoggerFactory.getLogger(P2PQuakeClient.class);
 
     private final ObjectMapper mapper;
+    private final SystemTray tray;
 
     public P2PQuakeClient(URI serverUri) {
         super(serverUri);
+
+        tray = SystemTray.get();
+        updateTrayStatus("Connecting to WebSocket...");
 
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -36,6 +41,7 @@ public class P2PQuakeClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
         logger.info("connected to p2pquake ws");
+        updateTrayStatus("Connected to P2PQuake");
     }
 
     @Override
@@ -279,13 +285,19 @@ public class P2PQuakeClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         logger.info("kicked out from socket, reconnecting...");
-        Thread reconnectThread = new Thread(this::reconnect);
+        updateTrayStatus("Reconnecting to WebSocket...");
 
+        Thread reconnectThread = new Thread(this::reconnect);
         reconnectThread.start();
     }
 
     @Override
     public void onError(Exception e) {
         logger.error("error occured: {}", e.getMessage());
+    }
+
+    private void updateTrayStatus(String message) {
+        if (tray == null) return;
+        tray.setStatus(message);
     }
 }
