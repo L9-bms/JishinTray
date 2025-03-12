@@ -248,8 +248,18 @@ public class P2PQuakeClient extends WebSocketClient {
                             eewDescription = "This warning has been cancelled.<br /><br />" + eewDescription;
                         }
 
+                        Map<String, List<String>> groupedAreas = new HashMap<>();
+                        if (eew.getAreas() != null) {
+                            eew.getAreas().forEach(area -> {
+                                if (!groupedAreas.containsKey(area.getPref())) {
+                                    groupedAreas.put(area.getPref(), new ArrayList<>());
+                                }
+                                groupedAreas.get(area.getPref()).add(area.getName());
+                            });
+                        }
+
                         Map<String, String> eewFields = new HashMap<>();
-                        eew.getAreas().forEach(area -> eewFields.put(area.getPref(), area.getName()));
+                        groupedAreas.forEach((pref, areas) -> eewFields.put(pref, String.join("<br />", areas)));
 
                         builder.setDescription(eewDescription).setFields(eewFields);
 
