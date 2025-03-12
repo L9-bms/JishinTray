@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class AboutFrame extends DialogFrame {
     public AboutFrame(boolean visible) {
-        super(visible);
+        super(visible, "About");
     }
 
     @Override

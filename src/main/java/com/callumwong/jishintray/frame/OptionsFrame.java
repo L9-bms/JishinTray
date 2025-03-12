@@ -1,9 +1,7 @@
 package com.callumwong.jishintray.frame;
 
 import com.callumwong.jishintray.config.AppConfig;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.FlatLightLaf;
+import com.callumwong.jishintray.util.ThemeUtil;
 import org.apache.commons.configuration2.Configuration;
 
 import javax.swing.*;
@@ -13,7 +11,7 @@ import java.io.IOException;
 
 public class OptionsFrame extends DialogFrame {
     public OptionsFrame(boolean visible) {
-        super(visible);
+        super(visible, "Options");
     }
 
     @Override
@@ -21,24 +19,18 @@ public class OptionsFrame extends DialogFrame {
         Configuration config = AppConfig.getInstance().getConfig();
 
         add(new JLabel("Theme"));
-        JComboBox<String> settingsComboBox = new JComboBox<>(new String[]{"Dark", "Light"});
-        settingsComboBox.setSelectedItem(config.getString("theme", "Dark"));
+        JComboBox<String> settingsComboBox = new JComboBox<>(ThemeUtil.Theme.names());
+        settingsComboBox.setSelectedItem(config.getString("theme").toLowerCase());
         settingsComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                config.setProperty("theme", e.getItem());
-                try {
-                    UIManager.setLookAndFeel(e.getItem() == "Dark" ? new FlatDarkLaf() : new FlatLightLaf());
-                } catch (UnsupportedLookAndFeelException ex) {
-                    throw new RuntimeException(ex);
-                }
-                FlatLaf.updateUILater();
+                config.setProperty("theme", ThemeUtil.setTheme(e.getItem().toString()));
             }
         });
         add(settingsComboBox, "wrap");
 
         add(new JLabel("Volume"));
-        JSlider volumeSlider = new JSlider(0, 100, config.getInt("volume", 100));
-        volumeSlider.setMajorTickSpacing(25);
+        JSlider volumeSlider = new JSlider(0, 100, config.getInt("volume"));
+        volumeSlider.setMajorTickSpacing(20);
         volumeSlider.setMinorTickSpacing(5);
         volumeSlider.setPaintTicks(true);
         volumeSlider.setPaintLabels(true);
@@ -47,8 +39,8 @@ public class OptionsFrame extends DialogFrame {
         add(volumeSlider, "wrap");
 
         add(new JLabel("Opacity"));
-        JSlider opacitySlider = new JSlider(0, 100, config.getInt("opacity", 75));
-        opacitySlider.setMajorTickSpacing(25);
+        JSlider opacitySlider = new JSlider(0, 100, config.getInt("opacity"));
+        opacitySlider.setMajorTickSpacing(20);
         opacitySlider.setMinorTickSpacing(5);
         opacitySlider.setPaintTicks(true);
         opacitySlider.setPaintLabels(true);
@@ -57,8 +49,8 @@ public class OptionsFrame extends DialogFrame {
         add(opacitySlider, "wrap");
 
         add(new JLabel("Fade out"));
-        JCheckBox fadeOutCheckBox = new JCheckBox("", config.getBoolean("fade_out", true));
-        JSlider fadeOutDelaySlider = new JSlider(0, 30, config.getInt("fade_out_delay", 10));
+        JCheckBox fadeOutCheckBox = new JCheckBox("", config.getBoolean("fade_out"));
+        JSlider fadeOutDelaySlider = new JSlider(0, 30, config.getInt("fade_out_delay"));
 
         fadeOutCheckBox.addChangeListener(e -> {
             config.setProperty("fade_out", fadeOutCheckBox.isSelected());
@@ -71,19 +63,13 @@ public class OptionsFrame extends DialogFrame {
         fadeOutDelaySlider.setMinorTickSpacing(5);
         fadeOutDelaySlider.setPaintTicks(true);
         fadeOutDelaySlider.setPaintLabels(true);
-        fadeOutDelaySlider.setSnapToTicks(true);
         fadeOutDelaySlider.addChangeListener(e -> config.setProperty("fade_out_delay", fadeOutDelaySlider.getValue()));
         fadeOutDelaySlider.setEnabled(fadeOutCheckBox.isSelected());
         add(fadeOutDelaySlider, "wrap");
 
-        JButton saveButton = new JButton("Save");
-        JButton cancelButton = new JButton("Close");
-
-        saveButton.addActionListener(e -> AppConfig.getInstance().saveConfig());
-        cancelButton.addActionListener(e -> dispose());
-
-        add(saveButton, "span, split 2, center");
-        add(cancelButton, "wrap");
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dispose());
+        add(closeButton, "span, center, wrap");
 
         JButton openDataDirButton = new JButton("<html><a href=\\\"\\\">Open data directory</a></html>");
         openDataDirButton.setBorderPainted(false);

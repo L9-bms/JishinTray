@@ -41,7 +41,7 @@ public class NotificationFrame extends JFrame {
         this.fields = fields;
         this.image = image;
 
-        initialOpacity = (float) config.getInt("opacity", 75) / 100f;
+        initialOpacity = (float) config.getInt("opacity") / 100f;
 
         setUndecorated(true);
         setOpacity(initialOpacity);
@@ -75,7 +75,7 @@ public class NotificationFrame extends JFrame {
     }
 
     private @NotNull Timer fadeOpacityTimer() {
-        Timer delayTimer = new Timer(config.getInt("fade_out_delay", 10) * 1000, e -> {
+        Timer delayTimer = new Timer(config.getInt("fade_out_delay") * 1000, e -> {
             ((Timer) e.getSource()).stop(); // Stop the delay timer
 
             // Timer to gradually fade out the JFrame
