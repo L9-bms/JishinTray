@@ -12,5 +12,4 @@ This app is incomplete. Some features I'd like to implement before release:
 
 - display a first launch window
 - add options comments to the default config
-- create the about window
-- minimum intensity, specific types of events (codes)
+- options for minimum intensity, specific types of events (codes)
