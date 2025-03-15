@@ -81,7 +81,7 @@ public class P2PQuakeClient extends WebSocketClient {
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
                     String earthquakeDescription = MessageFormat.format(
-                            getLocalizedString("string.earthquake.issued"), jmaQuake.getIssue().getTime());
+                            getLocalizedString("string.earthquake.issued"), issueTimeToLocalizedString(jmaQuake.getIssue().getTime()));
                     Map<String, String> earthquakeFields = new HashMap<>();
 
                     if (jmaQuake.getEarthquake().getMaxScale() != null) {

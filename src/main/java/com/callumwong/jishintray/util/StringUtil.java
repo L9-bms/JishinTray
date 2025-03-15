@@ -5,10 +5,19 @@ import com.callumwong.jishintray.model.JMAQuakeAllOfEarthquake;
 import com.callumwong.jishintray.model.JMATsunamiAllOfAreas;
 import com.callumwong.jishintray.model.JMATsunamiAllOfFirstHeight;
 import com.callumwong.jishintray.model.JMATsunamiAllOfMaxHeight;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 
 public class StringUtil {
+    private static final Logger log = LoggerFactory.getLogger(StringUtil.class);
+
     public static String scaleToString(BigDecimal scale) {
         return scaleToString(scale.intValue());
     }
@@ -74,6 +83,15 @@ public class StringUtil {
             case POTENTIAL -> getLocalizedString("string.earthquake.tsunami.potential");
             default -> getLocalizedString("string.earthquake.tsunami.unknown");
         };
+    }
+
+    public static String issueTimeToLocalizedString(String string) {
+        DateTimeFormatter originalFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        ZonedDateTime original = ZonedDateTime.parse(string, originalFormat.withZone(ZoneId.of("Asia/Tokyo")));
+        ZonedDateTime local = original.withZoneSameInstant(ZoneId.systemDefault());
+        Locale locale = JishinTray.getCurrentLocale();
+        DateTimeFormatter localFormal = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG).withLocale(locale);
+        return localFormal.format(local);
     }
 
     public static String getLocalizedString(String string) {
