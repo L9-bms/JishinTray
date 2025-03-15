@@ -72,8 +72,6 @@ public class JishinTray {
     }
 
     public static void main(String[] args) {
-        log.info("Starting JishinTray");
-
         currentLocale = Locale.getDefault();
         messages = ResourceBundle.getBundle("i18n.messages", currentLocale);
 
