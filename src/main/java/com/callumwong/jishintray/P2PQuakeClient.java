@@ -46,6 +46,7 @@ public class P2PQuakeClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
         updateTrayStatus(getLocalizedString("tray.status.connected"));
+        new NotificationFrame.Builder().setTitle("JishinTray").setDescription("Connected").createNotification();
     }
 
     @Override
