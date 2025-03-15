@@ -29,16 +29,6 @@ public class OptionsFrame extends DialogFrame {
         });
         add(settingsComboBox, "wrap");
 
-        add(new JLabel(StringUtil.getLocalizedString("setting.volume")));
-        JSlider volumeSlider = new JSlider(0, 100, config.getInt("volume"));
-        volumeSlider.setMajorTickSpacing(20);
-        volumeSlider.setMinorTickSpacing(5);
-        volumeSlider.setPaintTicks(true);
-        volumeSlider.setPaintLabels(true);
-        volumeSlider.setSnapToTicks(true);
-        volumeSlider.addChangeListener(e -> config.setProperty("volume", volumeSlider.getValue()));
-        add(volumeSlider, "wrap");
-
         add(new JLabel(StringUtil.getLocalizedString("setting.opacity")));
         JSlider opacitySlider = new JSlider(0, 100, config.getInt("opacity"));
         opacitySlider.setMajorTickSpacing(20);
