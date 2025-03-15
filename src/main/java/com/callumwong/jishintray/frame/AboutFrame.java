@@ -1,6 +1,7 @@
 package com.callumwong.jishintray.frame;
 
 import com.callumwong.jishintray.JishinTray;
+import com.callumwong.jishintray.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,38 +22,37 @@ public class AboutFrame extends DialogFrame {
     @Override
     protected void createUI() {
         add(new JLabel(String.format("""
-                <html>
-                <p><b>JishinTray %s</b></p>
-                <p>Copyright (C) 2025 %s</p>
-                <p>A tray app that notifies you of earthquakes in Japan.</p>
-                <html>
-                """, JishinTray.APP_VERSION, JishinTray.APP_AUTHOR)), "wrap");
+                        <html>
+                        <p><b>%s %s</b></p>
+                        <p>Copyright (C) 2025 %s</p>
+                        <p>%s</p>
+                        <html>
+                        """,
+                JishinTray.APP_NAME,
+                JishinTray.APP_VERSION,
+                JishinTray.APP_AUTHOR,
+                StringUtil.getLocalizedString("string.description"))
+        ), "wrap");
 
-        JLabel line3 = new JLabel("<html><a href=\"\">Earthquake data courtesy of P2PQuake</a><html>");
-        line3.addMouseListener(new MouseInputAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().browse(URI.create("https://www.p2pquake.net/"));
-                } catch (IOException ex) {
-                    log.error("unable to open hyperlink", ex);
-                }
-            }
-        });
-        add(line3, "wrap");
-        JLabel line4 = new JLabel("<html><a href=\"\">JishinTray is open source</a><html>");
-        line4.addMouseListener(new MouseInputAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().browse(URI.create("https://git.callumwong.com/callum/JishinTray"));
-                } catch (IOException ex) {
-                    log.error("unable to open hyperlink", ex);
-                }
-            }
-        });
-        add(line4, "wrap");
+        addLink(StringUtil.getLocalizedString("string.p2pquake"), "https://www.p2pquake.net/");
+        addLink(StringUtil.getLocalizedString("string.open_source"), "https://git.callumwong.com/callum/JishinTray");
 
         addCloseButton();
+    }
+
+    private void addLink(String message, String link) {
+        JLabel label = new JLabel(String.format("<html><a href=\"\">%s</a><html>", message));
+        label.addMouseListener(new MouseInputAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(URI.create(link));
+                } catch (IOException ex) {
+                    log.error(StringUtil.getLocalizedString("error.hyperlink"), ex);
+                }
+            }
+        });
+
+        add(label, "wrap");
     }
 }

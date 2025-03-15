@@ -1,5 +1,6 @@
 package com.callumwong.jishintray.frame;
 
+import com.callumwong.jishintray.util.StringUtil;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -37,7 +38,7 @@ public abstract class DialogFrame extends JFrame {
     protected abstract void createUI();
 
     protected void addCloseButton() {
-        JButton closeButton = new JButton("OK");
+        JButton closeButton = new JButton(StringUtil.getLocalizedString("button.close"));
         closeButton.addActionListener(e -> dispose());
         add(closeButton, "span, center, gaptop 20");
     }

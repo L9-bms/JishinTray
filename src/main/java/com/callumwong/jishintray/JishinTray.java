@@ -11,6 +11,7 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import javax.swing.*;
@@ -19,15 +20,20 @@ import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 public class JishinTray {
     public static final String APP_NAME = "JishinTray";
     public static final String APP_AUTHOR = "callumwong.com";
     public static final String APP_VERSION = ObjectUtils.defaultIfNull(
             JishinTray.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-
+    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
     private static final Logger log = LoggerFactory.getLogger(JishinTray.class);
+
+    private static Locale currentLocale;
+    private static ResourceBundle messages;
 
     public JishinTray() {
         Configuration config = AppConfig.getInstance().getConfig();
@@ -39,10 +45,8 @@ public class JishinTray {
 
         initTray();
 
-        String webSocketUrl = System.getenv("JISHINTRAY_WEBSOCKET_URL");
-        if (webSocketUrl == null) {
-            webSocketUrl = "wss://api.p2pquake.net/v2/ws";
-        }
+        String webSocketUrl = ObjectUtils.defaultIfNull(
+                System.getenv("JISHINTRAY_WEBSOCKET_URL"), "wss://api.p2pquake.net/v2/ws");
 
         if (AppConfig.getInstance().isFirstRun()) {
             new WelcomeFrame();
@@ -54,13 +58,24 @@ public class JishinTray {
 
             Runtime.getRuntime().addShutdownHook(new Thread(wsClient::close));
         } catch (URISyntaxException e) {
-            log.error(MarkerFactory.getMarker("FATAL"), "Invalid WebSocket URL! Exiting");
+            log.error(fatal, messages.getString("error.websocket.url"));
             System.exit(1);
         }
     }
 
+    public static ResourceBundle getMessages() {
+        return messages;
+    }
+
+    public static Locale getCurrentLocale() {
+        return currentLocale;
+    }
+
     public static void main(String[] args) {
         log.info("Starting JishinTray");
+
+        currentLocale = Locale.getDefault();
+        messages = ResourceBundle.getBundle("i18n.messages", currentLocale);
 
         new JishinTray();
     }
@@ -71,14 +86,15 @@ public class JishinTray {
         SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.Swing;
         SystemTray tray = SystemTray.get();
         if (tray == null) {
-            throw new RuntimeException("SystemTray is null");
+            log.error(fatal, messages.getString("error.tray"));
+            System.exit(1);
         }
 
         URL url = JishinTray.class.getClassLoader().getResource("icon.png");
         tray.setImage(Objects.requireNonNull(url));
 
-        tray.setStatus("Initialising...");
-        tray.getMenu().add(new MenuItem("Options", new ActionListener() {
+        tray.setStatus(messages.getString("tray.status.init"));
+        tray.getMenu().add(new MenuItem(messages.getString("tray.menu.config"), new ActionListener() {
             OptionsFrame optionsFrame;
 
             @Override
@@ -86,8 +102,8 @@ public class JishinTray {
                 optionsFrame = new OptionsFrame(true);
             }
         }));
-        tray.getMenu().add(new MenuItem("About", e -> aboutFrame.setVisible(true)));
+        tray.getMenu().add(new MenuItem(messages.getString("tray.menu.about"), e -> aboutFrame.setVisible(true)));
         tray.getMenu().add(new JSeparator());
-        tray.getMenu().add(new MenuItem("Exit", e -> System.exit(0)));
+        tray.getMenu().add(new MenuItem(messages.getString("tray.menu.exit"), e -> System.exit(0)));
     }
 }

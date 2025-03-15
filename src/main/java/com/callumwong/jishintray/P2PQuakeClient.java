@@ -2,7 +2,6 @@ package com.callumwong.jishintray;
 
 import com.callumwong.jishintray.frame.NotificationFrame;
 import com.callumwong.jishintray.model.*;
-import com.callumwong.jishintray.util.EnumUtil;
 import com.callumwong.jishintray.util.TableColumnAdjuster;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -20,10 +19,13 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.callumwong.jishintray.util.StringUtil.*;
 
 public class P2PQuakeClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(P2PQuakeClient.class);
@@ -35,7 +37,7 @@ public class P2PQuakeClient extends WebSocketClient {
         super(serverUri);
 
         tray = SystemTray.get();
-        updateTrayStatus("Connecting to WebSocket...");
+        updateTrayStatus(getLocalizedString("tray.status.connecting"));
 
         mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -43,8 +45,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        log.info("connected to p2pquake ws");
-        updateTrayStatus("Connected to P2PQuake");
+        updateTrayStatus(getLocalizedString("tray.status.connected"));
     }
 
     @Override
@@ -63,7 +64,7 @@ public class P2PQuakeClient extends WebSocketClient {
             } else if (node.hasNonNull("_id")) {
                 id = node.get("_id").asText();
             } else {
-                log.error("json object does not have id or _id field: {}", node.toPrettyString());
+                log.error(getLocalizedString("error.websocket.no_id"));
                 return;
             }
 
@@ -72,23 +73,25 @@ public class P2PQuakeClient extends WebSocketClient {
             try {
                 builder.setImage(URI.create(imageUrl).toURL());
             } catch (MalformedURLException e) {
-                log.error("error setting image", e);
+                log.error(getLocalizedString("error.image.url"), e);
             }
 
             switch (code) {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
-                    String earthquakeDescription = String.format("Issued on %s", jmaQuake.getIssue().getTime());
+                    String earthquakeDescription = MessageFormat.format(
+                            getLocalizedString("string.earthquake.issued"), jmaQuake.getIssue().getTime());
                     Map<String, String> earthquakeFields = new HashMap<>();
 
                     if (jmaQuake.getEarthquake().getMaxScale() != null) {
-                        earthquakeFields.put("Maximum Intensity", EnumUtil.scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
+                        earthquakeFields.put(getLocalizedString("string.earthquake.max_intensity"),
+                                scaleToString(jmaQuake.getEarthquake().getMaxScale().getValue()));
                     }
 
                     if (jmaQuake.getIssue().getType() == JMAQuakeAllOfIssue.TypeEnum.SCALE_PROMPT) {
-                        builder.setTitle("Earthquake Seismic Intensity Information");
-                        earthquakeDescription += "<br />Epicenter and tsunami information is under investigation.";
+                        builder.setTitle(getLocalizedString("string.earthquake.scale_prompt.title"));
+                        earthquakeDescription += "<br />" + getLocalizedString("string.earthquake.scale_prompt.description");
 
                         Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
                         if (jmaQuake.getPoints() != null) {
@@ -103,31 +106,34 @@ public class P2PQuakeClient extends WebSocketClient {
                         }
 
                         groupedIntensities.forEach((scale, prefs) -> earthquakeFields.put(
-                                String.format("Intensity %s", EnumUtil.scaleToString(scale.getValue())),
+                                MessageFormat.format(getLocalizedString("string.earthquake.intensity"), scaleToString(scale.getValue())),
                                 String.join("<br />", prefs))
                         );
                     } else {
                         builder.setTitle(switch (jmaQuake.getIssue().getType()) {
                             case DESTINATION:
-                                yield "Earthquake Epicenter Information";
+                                yield getLocalizedString("string.earthquake.destination.title");
+                            case FOREIGN:
+                                yield getLocalizedString("string.earthquake.foreign.title");
+                            case OTHER:
+                                yield getLocalizedString("string.earthquake.other.title");
                             case SCALE_AND_DESTINATION:
                             case DETAIL_SCALE:
-                                yield "Earthquake Information";
-                            case FOREIGN:
-                                yield "Foreign Earthquake Information";
-                            case OTHER:
-                                yield "Other Earthquake Information";
+                                yield getLocalizedString("string.earthquake.title");
                             default:
-                                throw new IllegalStateException("Unexpected value: " + jmaQuake.getIssue().getType());
+                                log.error(getLocalizedString("error.websocket.type"), jmaQuake.getIssue().getType());
+                                yield getLocalizedString("string.earthquake.title");
                         });
 
                         addHypocenterInfo(jmaQuake, earthquakeFields);
 
                         if (jmaQuake.getEarthquake().getDomesticTsunami() != null) {
-                            earthquakeFields.put("Tsunami", jmaQuake.getEarthquake().getDomesticTsunami().getValue());
+                            earthquakeFields.put(getLocalizedString("string.earthquake.tsunami"),
+                                    jmaQuake.getEarthquake().getDomesticTsunami().getValue());
                         }
                         if (jmaQuake.getEarthquake().getForeignTsunami() != null) {
-                            earthquakeFields.put("Foreign Tsunami", jmaQuake.getEarthquake().getForeignTsunami().getValue());
+                            earthquakeFields.put(getLocalizedString("string.earthquake.tsunami.foreign"),
+                                    jmaQuake.getEarthquake().getForeignTsunami().getValue());
                         }
                     }
 
@@ -139,14 +145,15 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 552: // Tsunami information
                     JMATsunami jmaTsunami = mapper.readValue(message, JMATsunami.class);
 
-                    builder.setTitle("Tsunami Information");
+                    builder.setTitle(getLocalizedString("string.tsunami.title"));
 
-                    String tsunamiDescription = String.format("Issued on %s", jmaTsunami.getIssue().getTime());
+                    String tsunamiDescription = MessageFormat.format(getLocalizedString("string.tsunami.description"),
+                            jmaTsunami.getIssue().getTime());
                     Map<String, JScrollPane> tsunamiFields = new HashMap<>();
 
                     Map<JMATsunamiAllOfAreas.GradeEnum, List<JMATsunamiAllOfAreas>> groupedTsunami = new HashMap<>();
                     if (jmaTsunami.getCancelled()) {
-                        tsunamiDescription += "<br /><br />This tsunami warning has been cancelled.";
+                        tsunamiDescription += "<br /><br />" + getLocalizedString("string.cancelled");
                     } else {
                         if (jmaTsunami.getAreas() != null) {
                             for (JMATsunamiAllOfAreas area : jmaTsunami.getAreas()) {
@@ -165,20 +172,25 @@ public class P2PQuakeClient extends WebSocketClient {
                             String firstHeight = "N/A";
                             if (a.getFirstHeight() != null) {
                                 if (a.getFirstHeight().getCondition() != null) {
-                                    firstHeight = EnumUtil.conditionToString(a.getFirstHeight().getCondition());
+                                    firstHeight = conditionToString(a.getFirstHeight().getCondition());
                                 } else if (a.getFirstHeight().getArrivalTime() != null) {
-                                    firstHeight = String.format("Arriving at %s", a.getFirstHeight().getArrivalTime());
+                                    firstHeight = String.format(getLocalizedString("string.tsunami.first_height"),
+                                            a.getFirstHeight().getArrivalTime());
                                 }
                             }
 
                             String maxHeight = a.getMaxHeight() != null && a.getMaxHeight().getDescription() != null
-                                    ? EnumUtil.maxHeightToString(a.getMaxHeight().getDescription())
+                                    ? maxHeightToString(a.getMaxHeight().getDescription())
                                     : "N/A";
 
                             return new String[]{a.getName(), firstHeight, maxHeight};
                         }).toList();
 
-                        String[] columnNames = new String[]{"Area", "First Height", "Max Height"};
+                        String[] columnNames = new String[]{
+                                getLocalizedString("string.tsunami.column.area"),
+                                getLocalizedString("string.tsunami.column.first_height"),
+                                getLocalizedString("string.tsunami.column.max_height")
+                        };
 
                         TableModel tableModel = new AbstractTableModel() {
                             @Override
@@ -216,7 +228,7 @@ public class P2PQuakeClient extends WebSocketClient {
                         JScrollPane jScrollPane = new JScrollPane();
                         jScrollPane.getViewport().add(table);
 
-                        tsunamiFields.put(EnumUtil.gradeToString(grade), jScrollPane);
+                        tsunamiFields.put(gradeToString(grade), jScrollPane);
                     });
 
                     builder.setDescription(tsunamiDescription).setFields(tsunamiFields);
@@ -228,24 +240,21 @@ public class P2PQuakeClient extends WebSocketClient {
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
 
                     SwingUtilities.invokeLater(() -> new NotificationFrame.Builder()
-                            .setTitle("Earthquake Early Warning")
-                            .setDescription("An earthquake early warning has been issued.")
+                            .setTitle(getLocalizedString("string.earthquake.eew.title"))
+                            .setDescription(getLocalizedString("string.earthquake.eew.description.detection"))
                             .createNotification());
 
                     break;
                 case 556: // EEW alert
                     EEW eew = mapper.readValue(message, EEW.class);
 
-                    builder.setTitle("Earthquake Early Warning");
-                    String eewDescription = """
-                            An earthquake early warning has been issued.<br />
-                            In the following prefectures, please beware of strong tremors.
-                            """;
+                    builder.setTitle(getLocalizedString("string.earthquake.eew.title"));
+                    String eewDescription = getLocalizedString("string.earthquake.eew.description.alert");
 
                     if (Boolean.TRUE.equals(eew.getTest())) return;
                     if (eew.getAreas() != null) {
                         if (eew.getCancelled()) {
-                            eewDescription = "This warning has been cancelled.<br /><br />" + eewDescription;
+                            eewDescription = getLocalizedString("string.cancelled") + "<br /><br />" + eewDescription;
                         }
 
                         Map<String, List<String>> groupedAreas = new HashMap<>();
@@ -272,7 +281,7 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 9611: // P2P Userquake Evaluation
                     break;
                 default:
-                    log.error("unexpected code: {}", code);
+                    log.error(getLocalizedString("error.websocket.code"), code);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -280,25 +289,25 @@ public class P2PQuakeClient extends WebSocketClient {
     }
 
     private void addHypocenterInfo(JMAQuake jmaQuake, Map<String, String> fields) {
-        if (jmaQuake.getEarthquake().getHypocenter() != null) {
-            fields.put("Hypocenter", String.format("%s (%s, %s)",
+        if (jmaQuake.getEarthquake().getHypocenter() != null)
+            fields.put(getLocalizedString("string.earthquake.hypocenter"), String.format("%s (%s, %s)",
                     jmaQuake.getEarthquake().getHypocenter().getName(),
                     jmaQuake.getEarthquake().getHypocenter().getLatitude(),
                     jmaQuake.getEarthquake().getHypocenter().getLongitude()
             ));
-        }
-        if (jmaQuake.getEarthquake().getHypocenter().getMagnitude() != null) {
-            fields.put("Magnitude", jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
-        }
-        if (jmaQuake.getEarthquake().getHypocenter().getDepth() != null) {
-            fields.put("Depth", jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
-        }
+
+        if (jmaQuake.getEarthquake().getHypocenter().getMagnitude() != null)
+            fields.put(getLocalizedString("string.earthquake.magnitude"),
+                    jmaQuake.getEarthquake().getHypocenter().getMagnitude().toString());
+
+        if (jmaQuake.getEarthquake().getHypocenter().getDepth() != null)
+            fields.put(getLocalizedString("string.earthquake.depth"),
+                    jmaQuake.getEarthquake().getHypocenter().getDepth().toString() + " km");
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.info("kicked out from socket, reconnecting...");
-        updateTrayStatus("Reconnecting to WebSocket...");
+        updateTrayStatus(getLocalizedString("tray.status.reconnecting"));
 
         Thread reconnectThread = new Thread(this::reconnect);
         reconnectThread.start();
@@ -306,7 +315,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        log.error("error occured: {}", e.getMessage());
+        log.error(getLocalizedString("error.websocket.error"), e.getMessage());
     }
 
     private void updateTrayStatus(String message) {

@@ -1,6 +1,7 @@
 package com.callumwong.jishintray.frame;
 
 import com.callumwong.jishintray.config.AppConfig;
+import com.callumwong.jishintray.util.StringUtil;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.configuration2.Configuration;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,6 @@ public class NotificationFrame extends JFrame {
     private final float initialOpacity;
 
     public NotificationFrame(String title, String description, Map<String, JComponent> fields, URL image) {
-        // Create window
         super();
 
         config = AppConfig.getInstance().getConfig();
@@ -51,7 +51,6 @@ public class NotificationFrame extends JFrame {
         createUI();
         pack();
 
-        // https://stackoverflow.com/questions/14431467/how-do-i-determine-the-position-of-the-system-tray-on-the-screen/
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         Rectangle bounds = gd.getDefaultConfiguration().getBounds();
         Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gd.getDefaultConfiguration());
@@ -144,11 +143,11 @@ public class NotificationFrame extends JFrame {
 
                 panel.add(imageLabel, "align center, span, wrap");
             } catch (IOException e) {
-                log.error("failed to add image: {}", e.getMessage());
+                log.error(StringUtil.getLocalizedString("error.image"));
             }
         }
 
-        JButton closeButton = new JButton("Dismiss");
+        JButton closeButton = new JButton(StringUtil.getLocalizedString("button.close"));
         closeButton.addActionListener(e -> dispose());
         panel.add(closeButton, "align center, span");
 
@@ -181,7 +180,7 @@ public class NotificationFrame extends JFrame {
                 } else if (value instanceof JComponent) {
                     map.put(key, (JComponent) value);
                 } else {
-                    throw new IllegalArgumentException("Unsupported field type: " + value.getClass());
+                    log.error(StringUtil.getLocalizedString("error.field"));
                 }
             });
             this.fields = map;

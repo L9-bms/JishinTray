@@ -1,6 +1,7 @@
 package com.callumwong.jishintray.config;
 
 import com.callumwong.jishintray.JishinTray;
+import com.callumwong.jishintray.util.StringUtil;
 import net.harawata.appdirs.AppDirs;
 import net.harawata.appdirs.AppDirsFactory;
 import org.apache.commons.configuration2.Configuration;
@@ -10,7 +11,6 @@ import org.apache.commons.configuration2.builder.ConfigurationBuilderEvent;
 import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.configuration2.reloading.ReloadingEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class AppConfig {
             try {
                 Files.createDirectories(dir);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.error(StringUtil.getLocalizedString("error.config.dir"), e.getLocalizedMessage());
             }
         }
 
@@ -51,7 +51,7 @@ public class AppConfig {
                 // TODO: add comments
                 Files.copy(Objects.requireNonNull(defaultConfig), file.toPath());
             } catch (IOException e) {
-                throw new RuntimeException("failed to copy default config to app dir", e);
+                log.error(StringUtil.getLocalizedString("error.config.copy"), e.getLocalizedMessage());
             }
         }
 
@@ -62,8 +62,6 @@ public class AppConfig {
         builder.setAutoSave(true);
         builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST, event ->
                 builder.getReloadingController().checkForReloading(null));
-        builder.getReloadingController().addEventListener(ReloadingEvent.ANY, event ->
-                log.info("(re)loading configuration"));
     }
 
     public Configuration getConfig() {

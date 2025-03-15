@@ -1,6 +1,7 @@
 package com.callumwong.jishintray.frame;
 
 import com.callumwong.jishintray.config.AppConfig;
+import com.callumwong.jishintray.util.StringUtil;
 import com.callumwong.jishintray.util.ThemeUtil;
 import org.apache.commons.configuration2.Configuration;
 
@@ -18,7 +19,7 @@ public class OptionsFrame extends DialogFrame {
     protected void createUI() {
         Configuration config = AppConfig.getInstance().getConfig();
 
-        add(new JLabel("Theme"));
+        add(new JLabel(StringUtil.getLocalizedString("setting.theme")));
         JComboBox<String> settingsComboBox = new JComboBox<>(ThemeUtil.Theme.names());
         settingsComboBox.setSelectedItem(config.getString("theme").toLowerCase());
         settingsComboBox.addItemListener(e -> {
@@ -28,7 +29,7 @@ public class OptionsFrame extends DialogFrame {
         });
         add(settingsComboBox, "wrap");
 
-        add(new JLabel("Volume"));
+        add(new JLabel(StringUtil.getLocalizedString("setting.volume")));
         JSlider volumeSlider = new JSlider(0, 100, config.getInt("volume"));
         volumeSlider.setMajorTickSpacing(20);
         volumeSlider.setMinorTickSpacing(5);
@@ -38,7 +39,7 @@ public class OptionsFrame extends DialogFrame {
         volumeSlider.addChangeListener(e -> config.setProperty("volume", volumeSlider.getValue()));
         add(volumeSlider, "wrap");
 
-        add(new JLabel("Opacity"));
+        add(new JLabel(StringUtil.getLocalizedString("setting.opacity")));
         JSlider opacitySlider = new JSlider(0, 100, config.getInt("opacity"));
         opacitySlider.setMajorTickSpacing(20);
         opacitySlider.setMinorTickSpacing(5);
@@ -48,7 +49,7 @@ public class OptionsFrame extends DialogFrame {
         opacitySlider.addChangeListener(e -> config.setProperty("opacity", opacitySlider.getValue()));
         add(opacitySlider, "wrap");
 
-        add(new JLabel("Fade out"));
+        add(new JLabel(StringUtil.getLocalizedString("setting.fade_out")));
         JCheckBox fadeOutCheckBox = new JCheckBox("", config.getBoolean("fade_out"));
         JSlider fadeOutDelaySlider = new JSlider(0, 30, config.getInt("fade_out_delay"));
 
@@ -58,7 +59,7 @@ public class OptionsFrame extends DialogFrame {
         });
         add(fadeOutCheckBox, "wrap");
 
-        add(new JLabel("Fade out delay"));
+        add(new JLabel(StringUtil.getLocalizedString("setting.fade_out_delay")));
         fadeOutDelaySlider.setMajorTickSpacing(10);
         fadeOutDelaySlider.setMinorTickSpacing(5);
         fadeOutDelaySlider.setPaintTicks(true);
@@ -69,7 +70,8 @@ public class OptionsFrame extends DialogFrame {
 
         addCloseButton();
 
-        JButton openDataDirButton = new JButton("<html><a href=\\\"\\\">Open data directory</a></html>");
+        JButton openDataDirButton = new JButton(
+                String.format("<html><a href=\\\"\\\">%s</a></html>", StringUtil.getLocalizedString("button.data_dir")));
         openDataDirButton.setBorderPainted(false);
         openDataDirButton.setFocusPainted(false);
         openDataDirButton.setContentAreaFilled(false);
