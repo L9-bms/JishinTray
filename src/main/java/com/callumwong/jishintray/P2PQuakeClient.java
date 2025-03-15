@@ -127,14 +127,12 @@ public class P2PQuakeClient extends WebSocketClient {
 
                         addHypocenterInfo(jmaQuake, earthquakeFields);
 
-                        if (jmaQuake.getEarthquake().getDomesticTsunami() != null) {
+                        if (jmaQuake.getEarthquake().getDomesticTsunami() != null)
                             earthquakeFields.put(getLocalizedString("string.earthquake.tsunami"),
-                                    jmaQuake.getEarthquake().getDomesticTsunami().getValue());
-                        }
-                        if (jmaQuake.getEarthquake().getForeignTsunami() != null) {
+                                    domesticTsunamiToString(jmaQuake.getEarthquake().getDomesticTsunami()));
+                        if (jmaQuake.getEarthquake().getForeignTsunami() != null)
                             earthquakeFields.put(getLocalizedString("string.earthquake.tsunami.foreign"),
-                                    jmaQuake.getEarthquake().getForeignTsunami().getValue());
-                        }
+                                    foreignTsunamiToString(jmaQuake.getEarthquake().getForeignTsunami()));
                     }
 
                     builder.setDescription(earthquakeDescription).setFields(earthquakeFields);

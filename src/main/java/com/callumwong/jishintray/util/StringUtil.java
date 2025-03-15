@@ -1,7 +1,10 @@
 package com.callumwong.jishintray.util;
 
 import com.callumwong.jishintray.JishinTray;
-import com.callumwong.jishintray.model.*;
+import com.callumwong.jishintray.model.JMAQuakeAllOfEarthquake;
+import com.callumwong.jishintray.model.JMATsunamiAllOfAreas;
+import com.callumwong.jishintray.model.JMATsunamiAllOfFirstHeight;
+import com.callumwong.jishintray.model.JMATsunamiAllOfMaxHeight;
 
 import java.math.BigDecimal;
 
@@ -46,6 +49,30 @@ public class StringUtil {
             case u -> getLocalizedString("string.tsunami.condition.immediately");
             case u2 -> getLocalizedString("string.tsunami.condition.otw");
             case u3 -> getLocalizedString("string.tsunami.condition.arrived");
+        };
+    }
+
+    public static String domesticTsunamiToString(JMAQuakeAllOfEarthquake.DomesticTsunamiEnum domesticTsunami) {
+        return switch (domesticTsunami) {
+            case NONE -> getLocalizedString("string.earthquake.tsunami.none");
+            case CHECKING -> getLocalizedString("string.earthquake.tsunami.checking");
+            case NON_EFFECTIVE -> getLocalizedString("string.earthquake.tsunami.non_effective");
+            case WATCH -> getLocalizedString("string.earthquake.tsunami.watch");
+            case WARNING -> getLocalizedString("string.earthquake.tsunami.warning");
+            default -> getLocalizedString("string.earthquake.tsunami.unknown");
+        };
+    }
+
+    public static String foreignTsunamiToString(JMAQuakeAllOfEarthquake.ForeignTsunamiEnum foreignTsunami) {
+        return switch (foreignTsunami) {
+            case NONE -> getLocalizedString("string.earthquake.tsunami.none");
+            case CHECKING -> getLocalizedString("string.earthquake.tsunami.checking");
+            case NON_EFFECTIVE_NEARBY -> getLocalizedString("string.earthquake.tsunami.non_effective_nearby");
+            case WARNING_NEARBY -> getLocalizedString("string.earthquake.tsunami.warning_nearby");
+            case WARNING_PACIFIC, WARNING_PACIFIC_WIDE -> getLocalizedString("string.earthquake.tsunami.warning_pacific");
+            case WARNING_INDIAN, WARNING_INDIAN_WIDE -> getLocalizedString("string.earthquake.tsunami.warning_indian");
+            case POTENTIAL -> getLocalizedString("string.earthquake.tsunami.potential");
+            default -> getLocalizedString("string.earthquake.tsunami.unknown");
         };
     }
 
