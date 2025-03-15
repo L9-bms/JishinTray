@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NotificationFrame extends JFrame {
-    private static final Logger logger = LoggerFactory.getLogger(NotificationFrame.class);
+    private static final Logger log = LoggerFactory.getLogger(NotificationFrame.class);
 
     private final String title;
     private final String description;
@@ -144,7 +144,7 @@ public class NotificationFrame extends JFrame {
 
                 panel.add(imageLabel, "align center, span, wrap");
             } catch (IOException e) {
-                logger.error("failed to add image: {}", e.getMessage());
+                log.error("failed to add image: {}", e.getMessage());
             }
         }
 

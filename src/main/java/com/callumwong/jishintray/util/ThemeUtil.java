@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 public class ThemeUtil {
-    private static final Logger logger = LoggerFactory.getLogger(ThemeUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ThemeUtil.class);
 
     public static String setTheme(String name) {
         return setTheme(Arrays.stream(Theme.values())
                 .filter(theme -> name.replace(" ", "_").equalsIgnoreCase(theme.toString())).findAny()
                 .orElseGet(() -> {
-                    logger.warn("unsupported theme '{}', resetting to dark", name);
+                    log.warn("unsupported theme '{}', resetting to dark", name);
                     return setTheme(Theme.DARK);
                 })).toString().toLowerCase();
     }

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class P2PQuakeClient extends WebSocketClient {
-    private static final Logger logger = LoggerFactory.getLogger(P2PQuakeClient.class);
+    private static final Logger log = LoggerFactory.getLogger(P2PQuakeClient.class);
 
     private final ObjectMapper mapper;
     private final SystemTray tray;
@@ -43,7 +43,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        logger.info("connected to p2pquake ws");
+        log.info("connected to p2pquake ws");
         updateTrayStatus("Connected to P2PQuake");
     }
 
@@ -55,7 +55,7 @@ public class P2PQuakeClient extends WebSocketClient {
             if (!node.has("code")) return;
             int code = node.get("code").asInt();
 
-            logger.debug(node.toString());
+            log.debug(node.toString());
 
             String id;
             if (node.hasNonNull("id")) {
@@ -63,7 +63,7 @@ public class P2PQuakeClient extends WebSocketClient {
             } else if (node.hasNonNull("_id")) {
                 id = node.get("_id").asText();
             } else {
-                logger.error("json object does not have id or _id field: {}", node.toPrettyString());
+                log.error("json object does not have id or _id field: {}", node.toPrettyString());
                 return;
             }
 
@@ -72,7 +72,7 @@ public class P2PQuakeClient extends WebSocketClient {
             try {
                 builder.setImage(URI.create(imageUrl).toURL());
             } catch (MalformedURLException e) {
-                logger.error("error setting image", e);
+                log.error("error setting image", e);
             }
 
             switch (code) {
@@ -272,7 +272,7 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 9611: // P2P Userquake Evaluation
                     break;
                 default:
-                    logger.error("unexpected code: {}", code);
+                    log.error("unexpected code: {}", code);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -297,7 +297,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        logger.info("kicked out from socket, reconnecting...");
+        log.info("kicked out from socket, reconnecting...");
         updateTrayStatus("Reconnecting to WebSocket...");
 
         Thread reconnectThread = new Thread(this::reconnect);
@@ -306,7 +306,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        logger.error("error occured: {}", e.getMessage());
+        log.error("error occured: {}", e.getMessage());
     }
 
     private void updateTrayStatus(String message) {

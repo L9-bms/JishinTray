@@ -17,6 +17,7 @@ public abstract class DialogFrame extends JFrame {
         setTitle(title);
         setLocationRelativeTo(null);
         setAutoRequestFocus(true);
+        setResizable(false);
         setVisible(visible);
     }
 
@@ -34,4 +35,10 @@ public abstract class DialogFrame extends JFrame {
     }
 
     protected abstract void createUI();
+
+    protected void addCloseButton() {
+        JButton closeButton = new JButton("OK");
+        closeButton.addActionListener(e -> dispose());
+        add(closeButton, "span, center, gaptop 20");
+    }
 }

@@ -23,9 +23,10 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public class AppConfig {
-    private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(AppConfig.class);
 
     private final ReloadingFileBasedConfigurationBuilder<FileBasedConfiguration> builder;
+    private boolean firstRun = false;
 
     private static AppConfig INSTANCE;
 
@@ -44,6 +45,7 @@ public class AppConfig {
 
         File file = new File(appDir, "config.properties");
         if (!file.exists()) {
+            firstRun = true;
             try {
                 InputStream defaultConfig = JishinTray.class.getClassLoader().getResourceAsStream("config.properties");
                 // TODO: add comments
@@ -61,7 +63,7 @@ public class AppConfig {
         builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST, event ->
                 builder.getReloadingController().checkForReloading(null));
         builder.getReloadingController().addEventListener(ReloadingEvent.ANY, event ->
-                logger.info("(re)loading configuration"));
+                log.info("(re)loading configuration"));
     }
 
     public Configuration getConfig() {
@@ -70,6 +72,10 @@ public class AppConfig {
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isFirstRun() {
+        return firstRun;
     }
 
     public ReloadingFileBasedConfigurationBuilder<FileBasedConfiguration> getConfigBuilder() {

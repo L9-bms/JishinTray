@@ -67,9 +67,7 @@ public class OptionsFrame extends DialogFrame {
         fadeOutDelaySlider.setEnabled(fadeOutCheckBox.isSelected());
         add(fadeOutDelaySlider, "wrap");
 
-        JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> dispose());
-        add(closeButton, "span, center, wrap");
+        addCloseButton();
 
         JButton openDataDirButton = new JButton("<html><a href=\\\"\\\">Open data directory</a></html>");
         openDataDirButton.setBorderPainted(false);
@@ -84,6 +82,6 @@ public class OptionsFrame extends DialogFrame {
             }
         });
 
-        add(openDataDirButton, "span 2, center");
+        add(openDataDirButton, "span 2, center, gaptop 10");
     }
 }
