@@ -2,7 +2,7 @@ package com.callumwong.jishintray;
 
 import com.callumwong.jishintray.config.AppConfig;
 import com.callumwong.jishintray.frame.AboutFrame;
-import com.callumwong.jishintray.frame.OptionsFrame;
+import com.callumwong.jishintray.frame.options.OptionsFrame;
 import com.callumwong.jishintray.frame.WelcomeFrame;
 import com.callumwong.jishintray.util.ThemeUtil;
 import dorkbox.systemTray.MenuItem;
