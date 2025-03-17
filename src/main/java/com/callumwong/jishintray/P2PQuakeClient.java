@@ -1,5 +1,7 @@
 package com.callumwong.jishintray;
 
+import com.callumwong.jishintray.config.AlertType;
+import com.callumwong.jishintray.config.AppConfig;
 import com.callumwong.jishintray.frame.NotificationFrame;
 import com.callumwong.jishintray.model.*;
 import com.callumwong.jishintray.util.TableColumnAdjuster;
@@ -20,10 +22,8 @@ import java.awt.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.callumwong.jishintray.util.StringUtil.*;
 
@@ -57,7 +57,7 @@ public class P2PQuakeClient extends WebSocketClient {
             if (!node.has("code")) return;
             int code = node.get("code").asInt();
 
-            log.debug(node.toString());
+            log.info(node.toString());
 
             String id;
             if (node.hasNonNull("id")) {
@@ -80,6 +80,8 @@ public class P2PQuakeClient extends WebSocketClient {
             switch (code) {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
+
+                    if (!selectedType(jmaQuake.getIssue().getType().name())) return;
 
                     String earthquakeDescription = MessageFormat.format(
                             getLocalizedString("string.earthquake.issued"), issueTimeToLocalizedString(jmaQuake.getIssue().getTime()));
@@ -142,6 +144,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     break;
                 case 552: // Tsunami information
+                    if (!selectedType(AlertType.TSUNAMI)) return;
                     JMATsunami jmaTsunami = mapper.readValue(message, JMATsunami.class);
 
                     builder.setTitle(getLocalizedString("string.tsunami.title"));
@@ -236,6 +239,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     break;
                 case 554: // EEW detection
+                    if (!selectedType(AlertType.EEW_DETECTION)) return;
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
 
                     SwingUtilities.invokeLater(() -> new NotificationFrame.Builder()
@@ -245,6 +249,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     break;
                 case 556: // EEW alert
+                    if (!selectedType(AlertType.EEW_ALERT)) return;
                     EEW eew = mapper.readValue(message, EEW.class);
 
                     builder.setTitle(getLocalizedString("string.earthquake.eew.title"));
@@ -320,5 +325,15 @@ public class P2PQuakeClient extends WebSocketClient {
     private void updateTrayStatus(String message) {
         if (tray == null) return;
         tray.setStatus(message);
+    }
+
+    private boolean selectedType(String type) {
+        return Arrays.stream(AppConfig.getInstance().getConfig().getString("subscribed_events")
+                .toUpperCase().split(",")).anyMatch(type::equalsIgnoreCase);
+    }
+
+    private boolean selectedType(AlertType type) {
+        return Arrays.stream(AppConfig.getInstance().getConfig().getString("subscribed_events")
+                .toUpperCase().split(",")).map(AlertType::valueOf).anyMatch(alertType -> alertType.equals(type));
     }
 }

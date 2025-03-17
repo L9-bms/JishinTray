@@ -1,5 +1,6 @@
 package com.callumwong.jishintray.frame.options;
 
+import com.callumwong.jishintray.config.AlertType;
 import com.callumwong.jishintray.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,7 +32,6 @@ public class NotificationsPanel extends OptionsPanel {
 
         Set<AlertType> selectedTypes = Arrays.stream(config.getString("subscribed_events")
                 .toUpperCase().split(",")).map(AlertType::valueOf).collect(Collectors.toSet());
-
         int i = 3;
         for (AlertType type : AlertType.values()) {
             JCheckBox typeCheckBox = new JCheckBox(type.getName(), selectedTypes.contains(type));
@@ -43,21 +43,6 @@ public class NotificationsPanel extends OptionsPanel {
             });
 
             this.add(typeCheckBox, "cell 1 %s 4 1".formatted(i++));
-        }
-    }
-
-    enum AlertType {
-        SCALE_AND_DESTINATION,
-        DESTINATION,
-        SCALE_PROMPT,
-        DETAIL_SCALE,
-        FOREIGN,
-        TSUNAMI,
-        EEW_DETECTION,
-        EEW_ALERT;
-
-        public String getName() {
-            return StringUtil.getLocalizedString("setting.notifications.types." + toString().toLowerCase());
         }
     }
 }
