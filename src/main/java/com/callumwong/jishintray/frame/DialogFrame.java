@@ -10,7 +10,7 @@ public abstract class DialogFrame extends JFrame {
         super();
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLayout(new MigLayout("debug, insets 20 20 20 20", "[]", "[]"));
+        setLayout(new MigLayout("insets 20 20 20 20", "[]", "[]"));
 
         createUI();
         pack();

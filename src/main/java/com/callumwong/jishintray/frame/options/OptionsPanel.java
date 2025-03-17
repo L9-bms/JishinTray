@@ -10,6 +10,6 @@ public abstract class OptionsPanel extends JPanel {
     protected final Configuration config = AppConfig.getInstance().getConfig();
 
     protected OptionsPanel() {
-        setLayout(new MigLayout("debug", "[]", "[]"));
+        setLayout(new MigLayout());
     }
 }
