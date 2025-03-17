@@ -23,7 +23,7 @@ public class ThemeUtil {
                 .orElseGet(() -> {
                     log.warn(StringUtil.getLocalizedString("error.unsupported_theme"), name);
                     return setTheme(Theme.DARK);
-                })).toString().toLowerCase();
+                })).toString();
     }
 
     public static Theme setTheme(Theme theme) {
