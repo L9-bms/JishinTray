@@ -3,14 +3,15 @@ package com.callumwong.jishintray.frame.options;
 import com.callumwong.jishintray.config.AppConfig;
 import com.callumwong.jishintray.util.StringUtil;
 import com.callumwong.jishintray.util.ThemeUtil;
+import net.miginfocom.swing.MigLayout;
 import org.apache.commons.configuration2.Configuration;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 
-public class AppearancePanel extends JPanel {
+public class AppearancePanel extends OptionsPanel {
     AppearancePanel() {
-        Configuration config = AppConfig.getInstance().getConfig();
+        super();
 
         add(new JLabel(StringUtil.getLocalizedString("setting.appearance.theme")));
         JComboBox<String> settingsComboBox = new JComboBox<>(ThemeUtil.Theme.names());

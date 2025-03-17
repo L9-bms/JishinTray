@@ -22,7 +22,7 @@ public class OptionsFrame extends DialogFrame {
         tabbedPane.addTab(StringUtil.getLocalizedString("setting.appearance"), new AppearancePanel());
         tabbedPane.addTab(StringUtil.getLocalizedString("setting.notifications"), new NotificationsPanel());
 
-        add(tabbedPane);
+        add(tabbedPane, "wrap");
         addButtons();
     }
 
