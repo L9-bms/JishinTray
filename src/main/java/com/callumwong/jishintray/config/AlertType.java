@@ -9,7 +9,6 @@ public enum AlertType {
     DETAIL_SCALE,
     FOREIGN,
     TSUNAMI,
-    EEW_DETECTION,
     EEW_ALERT;
 
     public String getName() {

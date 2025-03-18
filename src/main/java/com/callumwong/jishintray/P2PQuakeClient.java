@@ -238,16 +238,6 @@ public class P2PQuakeClient extends WebSocketClient {
                     SwingUtilities.invokeLater(builder::createNotification);
 
                     break;
-                case 554: // EEW detection
-                    if (isAlertTypeNotSelected(AlertType.EEW_DETECTION.toString())) return;
-                    EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
-
-                    SwingUtilities.invokeLater(() -> new NotificationFrame.Builder()
-                            .setTitle(getLocalizedString("string.earthquake.eew.title"))
-                            .setDescription(getLocalizedString("string.earthquake.eew.description.detection"))
-                            .createNotification());
-
-                    break;
                 case 556: // EEW alert
                     if (isAlertTypeNotSelected(AlertType.EEW_ALERT.toString())) return;
                     EEW eew = mapper.readValue(message, EEW.class);
@@ -280,6 +270,7 @@ public class P2PQuakeClient extends WebSocketClient {
                     }
 
                     break;
+                case 554: // EEW detection
                 case 555: // Peers in area
                 case 561: // P2P Userquake
                 case 9611: // P2P Userquake Evaluation
