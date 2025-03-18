@@ -5,14 +5,9 @@ import com.callumwong.jishintray.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class NotificationsPanel extends OptionsPanel {
     NotificationsPanel() {
@@ -23,9 +18,9 @@ public class NotificationsPanel extends OptionsPanel {
             int intensity = intensities[i];
             JRadioButton intensityButton = new JRadioButton(
                     StringUtil.scaleToString(intensity),
-                    config.getInt("minimum_intensity") == intensity
+                    config().getInt("minimum_intensity") == intensity
             );
-            intensityButton.addActionListener(e -> config.setProperty("minimum_intensity", intensity));
+            intensityButton.addActionListener(e -> config().setProperty("minimum_intensity", intensity));
 
             minimumIntensity.add(intensityButton);
             this.add(intensityButton, "cell %s %s%s".formatted((i % 4) + 1, i / 4, i == intensities.length - 1 ? ", wrap" : ""));
@@ -33,7 +28,7 @@ public class NotificationsPanel extends OptionsPanel {
 
         add(new JLabel(StringUtil.getLocalizedString("setting.notifications.types")));
 
-        Set<String> subscribedEventNames = Arrays.stream(config.getString("subscribed_events").toUpperCase().split(","))
+        Set<String> subscribedEventNames = Arrays.stream(config().getString("subscribed_events").toUpperCase().split(","))
                 .collect(Collectors.toSet());
 
         Set<AlertType> selectedAlertTypes = Arrays.stream(AlertType.values())
@@ -47,7 +42,7 @@ public class NotificationsPanel extends OptionsPanel {
                 if (typeCheckBox.isSelected()) selectedAlertTypes.add(type);
                 else selectedAlertTypes.remove(type);
 
-                config.setProperty("subscribed_events", StringUtils.join(selectedAlertTypes, ","));
+                config().setProperty("subscribed_events", StringUtils.join(selectedAlertTypes, ","));
             });
 
             this.add(typeCheckBox, "cell 1 %s 4 1".formatted(i++));

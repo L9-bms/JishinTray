@@ -7,9 +7,11 @@ import org.apache.commons.configuration2.Configuration;
 import javax.swing.*;
 
 public abstract class OptionsPanel extends JPanel {
-    protected final Configuration config = AppConfig.getInstance().getConfig();
-
     protected OptionsPanel() {
         setLayout(new MigLayout());
+    }
+
+    protected Configuration config() {
+        return AppConfig.getInstance().getConfig();
     }
 }
