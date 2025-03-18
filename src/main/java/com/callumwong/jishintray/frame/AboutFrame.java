@@ -35,7 +35,7 @@ public class AboutFrame extends DialogFrame {
         ), "wrap");
 
         addLink(StringUtil.getLocalizedString("string.p2pquake"), "https://www.p2pquake.net/");
-        addLink(StringUtil.getLocalizedString("string.open_source"), "https://git.callumwong.com/callum/JishinTray");
+        addLink(StringUtil.getLocalizedString("string.open_source"), "https://github.com/65-7a/JishinTray");
 
         addCloseButton();
     }
