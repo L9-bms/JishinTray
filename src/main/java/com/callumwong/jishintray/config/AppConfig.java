@@ -64,20 +64,20 @@ public class AppConfig {
                 builder.getReloadingController().checkForReloading(null));
     }
 
-    public Configuration getConfig() {
-        try {
-            return builder.getConfiguration();
-        } catch (ConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public boolean isFirstRun() {
         return firstRun;
     }
 
     public ReloadingFileBasedConfigurationBuilder<FileBasedConfiguration> getConfigBuilder() {
         return builder;
+    }
+
+    public Configuration getConfig() {
+        try {
+            return builder.getConfiguration();
+        } catch (ConfigurationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static AppConfig getInstance() {

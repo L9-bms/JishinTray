@@ -2,12 +2,11 @@ package com.callumwong.jishintray;
 
 import com.callumwong.jishintray.config.AppConfig;
 import com.callumwong.jishintray.frame.AboutFrame;
-import com.callumwong.jishintray.frame.options.OptionsFrame;
 import com.callumwong.jishintray.frame.WelcomeFrame;
+import com.callumwong.jishintray.frame.options.OptionsFrame;
 import com.callumwong.jishintray.util.ThemeUtil;
 import dorkbox.systemTray.MenuItem;
 import dorkbox.systemTray.SystemTray;
-import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +35,12 @@ public class JishinTray {
     private static ResourceBundle messages;
 
     public JishinTray() {
-        Configuration config = AppConfig.getInstance().getConfig();
 
         System.setProperty("apple.awt.enableTemplateImages", "true");
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-        config.setProperty("theme", ThemeUtil.setTheme(config.getString("theme")));
+        AppConfig.getInstance().getConfig().setProperty("theme",
+                ThemeUtil.setTheme(AppConfig.getInstance().getConfig().getString("theme")));
 
         initTray();
 
