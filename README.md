@@ -11,6 +11,5 @@ P2PQuake client in Java Swing
 This app is incomplete. Some features I'd like to implement before release:
 
 - add options comments to the default config
-- options for minimum intensity, specific types of events (codes)
 - map rendering using https://docs.geotools.org/latest/userguide/tutorial/raster/image.html
 - add back volume option when voicelines (talqu teto) are ready
