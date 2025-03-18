@@ -81,7 +81,7 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 551: // Earthquake information
                     JMAQuake jmaQuake = mapper.readValue(message, JMAQuake.class);
 
-                    if (!selectedType(jmaQuake.getIssue().getType().name())) return;
+                    if (isAlertTypeNotSelected(jmaQuake.getIssue().getType().name())) return;
 
                     String earthquakeDescription = MessageFormat.format(
                             getLocalizedString("string.earthquake.issued"), issueTimeToLocalizedString(jmaQuake.getIssue().getTime()));
@@ -144,7 +144,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     break;
                 case 552: // Tsunami information
-                    if (!selectedType(AlertType.TSUNAMI)) return;
+                    if (isAlertTypeNotSelected(AlertType.TSUNAMI.toString())) return;
                     JMATsunami jmaTsunami = mapper.readValue(message, JMATsunami.class);
 
                     builder.setTitle(getLocalizedString("string.tsunami.title"));
@@ -239,7 +239,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     break;
                 case 554: // EEW detection
-                    if (!selectedType(AlertType.EEW_DETECTION)) return;
+                    if (isAlertTypeNotSelected(AlertType.EEW_DETECTION.toString())) return;
                     EEWDetection eewDetection = mapper.readValue(message, EEWDetection.class);
 
                     SwingUtilities.invokeLater(() -> new NotificationFrame.Builder()
@@ -249,7 +249,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
                     break;
                 case 556: // EEW alert
-                    if (!selectedType(AlertType.EEW_ALERT)) return;
+                    if (isAlertTypeNotSelected(AlertType.EEW_ALERT.toString())) return;
                     EEW eew = mapper.readValue(message, EEW.class);
 
                     builder.setTitle(getLocalizedString("string.earthquake.eew.title"));
@@ -327,13 +327,8 @@ public class P2PQuakeClient extends WebSocketClient {
         tray.setStatus(message);
     }
 
-    private boolean selectedType(String type) {
+    private boolean isAlertTypeNotSelected(String type) {
         return Arrays.stream(AppConfig.getInstance().getConfig().getString("subscribed_events")
-                .toUpperCase().split(",")).anyMatch(type::equalsIgnoreCase);
-    }
-
-    private boolean selectedType(AlertType type) {
-        return Arrays.stream(AppConfig.getInstance().getConfig().getString("subscribed_events")
-                .toUpperCase().split(",")).map(AlertType::valueOf).anyMatch(alertType -> alertType.equals(type));
+                .toUpperCase().split(",")).noneMatch(type::equalsIgnoreCase);
     }
 }
