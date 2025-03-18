@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NotificationsPanel extends OptionsPanel {
     NotificationsPanel() {
@@ -30,16 +33,21 @@ public class NotificationsPanel extends OptionsPanel {
 
         add(new JLabel(StringUtil.getLocalizedString("setting.notifications.types")));
 
-        Set<AlertType> selectedTypes = Arrays.stream(config.getString("subscribed_events")
-                .toUpperCase().split(",")).map(AlertType::valueOf).collect(Collectors.toSet());
+        Set<String> subscribedEventNames = Arrays.stream(config.getString("subscribed_events").toUpperCase().split(","))
+                .collect(Collectors.toSet());
+
+        Set<AlertType> selectedAlertTypes = Arrays.stream(AlertType.values())
+                .filter(alertType -> subscribedEventNames.contains(alertType.toString()))
+                .collect(Collectors.toSet());
+
         int i = 3;
         for (AlertType type : AlertType.values()) {
-            JCheckBox typeCheckBox = new JCheckBox(type.getName(), selectedTypes.contains(type));
+            JCheckBox typeCheckBox = new JCheckBox(type.getName(), selectedAlertTypes.contains(type));
             typeCheckBox.addActionListener(e -> {
-                if (typeCheckBox.isSelected()) selectedTypes.add(type);
-                else selectedTypes.remove(type);
+                if (typeCheckBox.isSelected()) selectedAlertTypes.add(type);
+                else selectedAlertTypes.remove(type);
 
-                config.setProperty("subscribed_events", StringUtils.join(selectedTypes, ","));
+                config.setProperty("subscribed_events", StringUtils.join(selectedAlertTypes, ","));
             });
 
             this.add(typeCheckBox, "cell 1 %s 4 1".formatted(i++));
