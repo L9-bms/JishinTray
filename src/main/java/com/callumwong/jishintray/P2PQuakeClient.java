@@ -96,7 +96,9 @@ public class P2PQuakeClient extends WebSocketClient {
                         builder.setTitle(getLocalizedString("string.earthquake.scale_prompt.title"));
                         earthquakeDescription += "<br />" + getLocalizedString("string.earthquake.scale_prompt.description");
 
-                        Map<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new HashMap<>();
+                        TreeMap<JMAQuakeAllOfPoints.ScaleEnum, List<String>> groupedIntensities = new TreeMap<>(
+                                Comparator.comparing(JMAQuakeAllOfPoints.ScaleEnum::getValue));
+
                         if (jmaQuake.getPoints() != null) {
                             for (JMAQuakeAllOfPoints point : jmaQuake.getPoints()) {
                                 JMAQuakeAllOfPoints.ScaleEnum scale = point.getScale();
@@ -153,7 +155,9 @@ public class P2PQuakeClient extends WebSocketClient {
                             jmaTsunami.getIssue().getTime());
                     Map<String, JScrollPane> tsunamiFields = new HashMap<>();
 
-                    Map<JMATsunamiAllOfAreas.GradeEnum, List<JMATsunamiAllOfAreas>> groupedTsunami = new HashMap<>();
+                    TreeMap<JMATsunamiAllOfAreas.GradeEnum, List<JMATsunamiAllOfAreas>> groupedTsunami = new TreeMap<>(
+                            Comparator.reverseOrder()
+                    );
                     if (jmaTsunami.getCancelled()) {
                         tsunamiDescription += "<br /><br />" + getLocalizedString("string.cancelled");
                     } else {
