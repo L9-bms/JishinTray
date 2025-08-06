@@ -1,7 +1,6 @@
 package com.callumwong.jishintray.config;
 
 import com.callumwong.jishintray.JishinTray;
-import com.callumwong.jishintray.util.StringUtil;
 import net.harawata.appdirs.AppDirs;
 import net.harawata.appdirs.AppDirsFactory;
 import org.apache.commons.configuration2.Configuration;
@@ -46,8 +45,7 @@ public class AppConfig {
         File file = new File(appDir, "config.properties");
         if (!file.exists()) {
             firstRun = true;
-            try {
-                InputStream defaultConfig = JishinTray.class.getClassLoader().getResourceAsStream("config.properties");
+            try (InputStream defaultConfig = JishinTray.class.getClassLoader().getResourceAsStream("config.properties")) {
                 // TODO: add comments
                 Files.copy(Objects.requireNonNull(defaultConfig), file.toPath());
             } catch (IOException e) {
