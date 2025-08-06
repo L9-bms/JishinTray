@@ -48,7 +48,7 @@ public class AboutFrame extends DialogFrame {
                 try {
                     Desktop.getDesktop().browse(URI.create(link));
                 } catch (IOException ex) {
-                    log.error(StringUtil.getLocalizedString("error.hyperlink"), ex);
+                    log.error("Failed to open hyperlink: {}", ex.getMessage());
                 }
             }
         });

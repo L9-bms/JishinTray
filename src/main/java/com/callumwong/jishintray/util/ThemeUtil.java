@@ -21,7 +21,7 @@ public class ThemeUtil {
         return setTheme(Arrays.stream(Theme.values())
                 .filter(theme -> name.replace(" ", "_").equalsIgnoreCase(theme.toString())).findAny()
                 .orElseGet(() -> {
-                    log.warn(StringUtil.getLocalizedString("error.unsupported_theme"), name);
+                    log.warn("{} is an unsupported theme, resetting to dark", name);
                     return setTheme(Theme.DARK);
                 })).toString();
     }

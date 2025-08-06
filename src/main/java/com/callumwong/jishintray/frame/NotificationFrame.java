@@ -143,7 +143,7 @@ public class NotificationFrame extends JFrame {
 
                 panel.add(imageLabel, "align center, span, wrap");
             } catch (IOException e) {
-                log.error(StringUtil.getLocalizedString("error.image"));
+                log.error("Failed to fetch image from {}", image);
             }
         }
 
@@ -180,7 +180,7 @@ public class NotificationFrame extends JFrame {
                 } else if (value instanceof JComponent) {
                     map.put(key, (JComponent) value);
                 } else {
-                    log.error(StringUtil.getLocalizedString("error.field"));
+                    log.error("Unsupported field class: {}", value.getClass().getName());
                 }
             });
             this.fields = map;

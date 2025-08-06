@@ -39,7 +39,7 @@ public class AppConfig {
             try {
                 Files.createDirectories(dir);
             } catch (IOException e) {
-                log.error(StringUtil.getLocalizedString("error.config.dir"), e.getLocalizedMessage());
+                log.error("Failed to create app directory: {}", e.getMessage());
             }
         }
 
@@ -51,7 +51,7 @@ public class AppConfig {
                 // TODO: add comments
                 Files.copy(Objects.requireNonNull(defaultConfig), file.toPath());
             } catch (IOException e) {
-                log.error(StringUtil.getLocalizedString("error.config.copy"), e.getLocalizedMessage());
+                log.error("Failed to copy default configuration: {}", e.getMessage());
             }
         }
 

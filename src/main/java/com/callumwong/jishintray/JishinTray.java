@@ -57,7 +57,7 @@ public class JishinTray {
 
             Runtime.getRuntime().addShutdownHook(new Thread(wsClient::close));
         } catch (URISyntaxException e) {
-            log.error(fatal, messages.getString("error.websocket.url"));
+            log.error(fatal, "Invalid websocket URL!");
             System.exit(1);
         }
     }
@@ -83,7 +83,7 @@ public class JishinTray {
         SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.Swing;
         SystemTray tray = SystemTray.get();
         if (tray == null) {
-            log.error(fatal, messages.getString("error.tray"));
+            log.error(fatal, "SystemTray.get returned null");
             System.exit(1);
         }
 

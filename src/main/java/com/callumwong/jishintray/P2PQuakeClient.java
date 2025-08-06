@@ -65,7 +65,7 @@ public class P2PQuakeClient extends WebSocketClient {
             } else if (node.hasNonNull("_id")) {
                 id = node.get("_id").asText();
             } else {
-                log.error(getLocalizedString("error.websocket.no_id"));
+                log.error("Received JSON object does not have id or _id field");
                 return;
             }
 
@@ -74,7 +74,7 @@ public class P2PQuakeClient extends WebSocketClient {
             try {
                 builder.setImage(URI.create(imageUrl).toURL());
             } catch (MalformedURLException e) {
-                log.error(getLocalizedString("error.image.url"), e);
+                log.error("Malformed image url: {}", e.getMessage());
             }
 
             switch (code) {
@@ -126,7 +126,7 @@ public class P2PQuakeClient extends WebSocketClient {
                             case DETAIL_SCALE:
                                 yield getLocalizedString("string.earthquake.title");
                             default:
-                                log.error(getLocalizedString("error.websocket.type"), jmaQuake.getIssue().getType());
+                                log.error("Received earthquake object has unexpected type: {}", jmaQuake.getIssue().getType());
                                 yield getLocalizedString("string.earthquake.title");
                         });
 
@@ -280,7 +280,7 @@ public class P2PQuakeClient extends WebSocketClient {
                 case 9611: // P2P Userquake Evaluation
                     break;
                 default:
-                    log.error(getLocalizedString("error.websocket.code"), code);
+                    log.error("Unexpected code from P2PQuake WS: {}", code);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -314,7 +314,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        log.error(getLocalizedString("error.websocket.error"), e.getMessage());
+        log.error("Error received from WS: {}", e.getMessage());
     }
 
     private void updateTrayStatus(String message) {
