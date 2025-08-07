@@ -37,6 +37,7 @@ public class AppConfig {
         if (!Files.exists(dir)) {
             try {
                 Files.createDirectories(dir);
+                log.debug("Created app directory at {}", dir);
             } catch (IOException e) {
                 log.error("Failed to create app directory: {}", e.getMessage());
             }
@@ -48,6 +49,7 @@ public class AppConfig {
             try (InputStream defaultConfig = JishinTray.class.getClassLoader().getResourceAsStream("config.properties")) {
                 // TODO: add comments
                 Files.copy(Objects.requireNonNull(defaultConfig), file.toPath());
+                log.debug("Copied default config to {}", file.toPath());
             } catch (IOException e) {
                 log.error("Failed to copy default configuration: {}", e.getMessage());
             }

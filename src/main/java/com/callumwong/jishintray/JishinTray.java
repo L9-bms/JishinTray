@@ -48,11 +48,13 @@ public class JishinTray {
                 System.getenv("JISHINTRAY_WEBSOCKET_URL"), "wss://api.p2pquake.net/v2/ws");
 
         if (AppConfig.getInstance().isFirstRun()) {
+            log.debug("This appears to be the first run, welcome");
             new WelcomeFrame();
         }
 
         try {
             P2PQuakeClient wsClient = new P2PQuakeClient(new URI(webSocketUrl));
+            log.debug("Connecting to websocket");
             wsClient.connect();
 
             Runtime.getRuntime().addShutdownHook(new Thread(wsClient::close));

@@ -24,10 +24,14 @@ import java.net.URI;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.callumwong.jishintray.util.StringUtil.*;
 
 public class P2PQuakeClient extends WebSocketClient {
+    private static final int RECONNECT_DELAY = 5;
+
     private static final Logger log = LoggerFactory.getLogger(P2PQuakeClient.class);
 
     private final ObjectMapper mapper;
@@ -45,6 +49,7 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
+        log.debug("connected to websocket with status message {}", serverHandshake.getHttpStatusMessage());
         updateTrayStatus(getLocalizedString("tray.status.connected"));
         new NotificationFrame.Builder().setTitle("JishinTray").setDescription("Connected").createNotification();
     }
@@ -306,10 +311,11 @@ public class P2PQuakeClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
+        log.debug("connection lost, attempting to reconnect in {} seconds", RECONNECT_DELAY);
         updateTrayStatus(getLocalizedString("tray.status.reconnecting"));
 
-        Thread reconnectThread = new Thread(this::reconnect);
-        reconnectThread.start();
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+        executor.schedule(this::reconnect, RECONNECT_DELAY, TimeUnit.SECONDS);
     }
 
     @Override

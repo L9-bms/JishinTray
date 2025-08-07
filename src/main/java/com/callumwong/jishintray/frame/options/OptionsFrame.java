@@ -3,12 +3,9 @@ package com.callumwong.jishintray.frame.options;
 import com.callumwong.jishintray.config.AppConfig;
 import com.callumwong.jishintray.frame.DialogFrame;
 import com.callumwong.jishintray.util.StringUtil;
-import com.callumwong.jishintray.util.ThemeUtil;
-import org.apache.commons.configuration2.Configuration;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
 import java.io.IOException;
 
 public class OptionsFrame extends DialogFrame {
